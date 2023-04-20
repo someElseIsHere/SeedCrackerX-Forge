@@ -42,7 +42,7 @@ a port of 19MisterX98's SeedcrackerX for forge
 
   The command prefix for this mod is /seed.
   
-  ### Render Command  
+  ### Render Command (Currently Broken)
   -`/seed render outlines <ON/OFF/XRAY>`
     
   This command only affects the renderer feedback. The default value is 'XRAY' and highlights data through blocks. You can set    the render mod to 'ON' for more standard rendering. 
