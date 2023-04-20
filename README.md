@@ -97,7 +97,7 @@ A list of features I have on my mind... they won't necessarily be implemented in
 
 ## Building the Mod
 
--Update the version in `build.gradle` and `fabric.mod.json`.
+-Update the version in `build.gradle` and `mod.toml`.
 
 -Run `gradlew build`.
  
