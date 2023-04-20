@@ -15,6 +15,7 @@ a port of 19MisterX98's SeedcrackerX for forge
  
   Download the lastest [release](https://github.com/someElseIsHere/SeedCrackerX-Forge/releases) of SeedCrackerX Forge    
   Download [Cloth Config](https://www.curseforge.com/minecraft/mc-mods/cloth-config)
+  
   put the .jar files in your mods directory, either %appdata%/.minecraft/mods/ folder for the vanilla launcher or your own MultiMC instance folder.
   
 ## Usage
