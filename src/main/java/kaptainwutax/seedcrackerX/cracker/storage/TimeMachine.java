@@ -1,272 +1,519 @@
 package kaptainwutax.seedcrackerX.cracker.storage;
 
-import com.seedfinding.latticg.util.LCG;
 import com.seedfinding.mcbiome.source.OverworldBiomeSource;
 import com.seedfinding.mccore.rand.ChunkRand;
+import com.seedfinding.mccore.rand.seed.PillarSeed;
 import com.seedfinding.mccore.rand.seed.StructureSeed;
 import com.seedfinding.mccore.rand.seed.WorldSeed;
+import com.seedfinding.mccore.version.MCVersion;
 import com.seedfinding.mcfeature.Feature;
+import com.seedfinding.mcfeature.structure.OldStructure;
+import com.seedfinding.mcfeature.structure.PillagerOutpost;
+import com.seedfinding.mcfeature.structure.Shipwreck;
+import com.seedfinding.mcfeature.structure.UniformStructure;
+import com.seedfinding.mcseed.lcg.LCG;
 import kaptainwutax.seedcrackerX.SeedCracker;
+import kaptainwutax.seedcrackerX.config.Config;
 import kaptainwutax.seedcrackerX.cracker.BiomeData;
+import kaptainwutax.seedcrackerX.cracker.decorator.Decorator;
+import kaptainwutax.seedcrackerX.util.Database;
 import kaptainwutax.seedcrackerX.util.Log;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.text.Text;
+import net.minecraft.util.math.random.ChunkRandom;
+import net.minecraft.util.math.random.Xoroshiro128PlusPlusRandom;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+import java.util.stream.LongStream;
+import java.util.stream.Stream;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TimeMachine {
+    private static final Logger logger = LoggerFactory.getLogger("timeMachine");
 
-	public static ExecutorService SERVICE = Executors.newFixedThreadPool(5);
+    public static ExecutorService SERVICE = Executors.newFixedThreadPool(5);
 
-	private LCG inverseLCG = LCG.JAVA.combine(-2);
-	protected DataStorage dataStorage;
+    private final LCG inverseLCG = LCG.JAVA.combine(-2);
+    public boolean isRunning = false;
+    public boolean shouldTerminate = false;
+    public List<Integer> pillarSeeds = null;
+    public Set<Long> structureSeeds = new HashSet<>();
+    public Set<Long> worldSeeds = new HashSet<>();
+    protected DataStorage dataStorage;
 
-	public boolean isRunning = false;
-	public boolean shouldTerminate = false;
+    public TimeMachine(DataStorage dataStorage) {
+        this.dataStorage = dataStorage;
+    }
 
-	public List<Integer> pillarSeeds = null;
-	public List<Long> structureSeeds = null;
-	public List<Long> worldSeeds = null;
+    public void poke(Phase phase) {
+        if (this.worldSeeds.size() == 1) return;
+        this.isRunning = true;
 
-	public TimeMachine(DataStorage dataStorage) {
-		this.dataStorage = dataStorage;
-	}
+        while (phase != null && !this.shouldTerminate) {
+            if (phase != Phase.BIOMES && pokeStructureReduce()) {
+                phase = Phase.BIOMES;
+                continue;
 
-	public void poke(Phase phase) {
-		this.isRunning = true;
+            } else if (phase == Phase.STRUCTURES) {
+                if (!pokeStructures()) break;
 
-		final Phase[] finalPhase = {phase};
+            } else if (phase == Phase.LIFTING) {
+                if (!pokeStructures() && !pokeLifting()) break;
 
-		while(finalPhase[0] != null && !this.shouldTerminate) {
-			if(finalPhase[0] == Phase.PILLARS) {
-				if(!this.pokePillars())break;
-			} else if(finalPhase[0] == Phase.STRUCTURES) {
-				if(!this.pokeStructures())break;
-			} else if(finalPhase[0] == Phase.BIOMES) {
-				if(!this.pokeBiomes())break;
-			}
+            } else if (phase == Phase.PILLARS) {
+                if (!this.pokePillars()) break;
 
-			finalPhase[0] = finalPhase[0].nextPhase();
-		}
-	}
+            } else if (phase == Phase.BIOMES) {
+                if (!this.pokeBiomes()) break;
+            }
 
-	protected boolean pokePillars() {
-		if(this.pillarSeeds != null || this.dataStorage.pillarData == null)return false;
-		this.pillarSeeds = new ArrayList<>();
+            phase = phase.nextPhase();
+        }
+        if (this.worldSeeds.size() == 1 && !this.shouldTerminate) {
+            long seed = worldSeeds.stream().findFirst().get();
+            SeedCracker.entrypoints.forEach(entrypoint -> entrypoint.pushWorldSeed(seed));
+            MinecraftClient client = MinecraftClient.getInstance();
+            if (Config.get().databaseSubmits && client.getNetworkHandler().getPlayerList().size() > 10 &&
+                    !client.getNetworkHandler().getConnection().isLocal()) {
+                Text text = Database.joinFakeServerForAuth();
+                if (text == null) {
+                    Database.handleDatabaseCall(seed);
+                } else {
+                    Log.error(text.getString());
+                }
+            }
+        }
+    }
 
-		Log.debug("====================================");
-		Log.warn("Looking for pillar seeds...");
+    protected boolean pokePillars() {
+        if (this.pillarSeeds != null || this.dataStorage.pillarData == null) return false;
+        this.pillarSeeds = new ArrayList<>();
 
-		for(int pillarSeed = 0; pillarSeed < 1 << 16 && !this.shouldTerminate; pillarSeed++) {
-			if(this.dataStorage.pillarData.test(pillarSeed)) {
-				Log.printSeed("Found pillar seed ${SEED}.", pillarSeed);
-				this.pillarSeeds.add(pillarSeed);
-			}
-		}
+        Log.debug("====================================");
+        Log.warn("tmachine.lookingForPillarSeed");
 
-		if(!this.pillarSeeds.isEmpty()) {
-			Log.warn("Finished searching for pillar seeds.");
-		} else {
-			Log.error("Finished search with no results.");
-		}
+        for (int pillarSeed = 0; pillarSeed < 1 << 16 && !this.shouldTerminate; pillarSeed++) {
+            if (this.dataStorage.pillarData.test(pillarSeed)) {
+                Log.printSeed("tmachine.foundPillarSeed", pillarSeed);
+                this.pillarSeeds.add(pillarSeed);
+            }
+        }
 
-		return true;
-	}
+        if (!this.pillarSeeds.isEmpty()) {
+            Log.warn("tmachine.pillarSeedSearchFinished");
+        } else {
+            Log.error("finishedSearchNoResult");
+        }
 
-	protected boolean pokeStructures() {
-		if(this.pillarSeeds == null || this.structureSeeds != null ||
-				this.dataStorage.getBaseBits() < this.dataStorage.getWantedBits())return false;
+        return true;
+    }
 
-		this.structureSeeds = new ArrayList<>();
+    protected boolean pokeLifting() {
+        if (!this.structureSeeds.isEmpty() || this.dataStorage.getLiftingBits() < 40F) return false;
+        List<UniformStructure.Data<?>> dataList = new ArrayList<>();
 
-		Feature.Data<?>[] cache = new Feature.Data<?>[this.dataStorage.baseSeedData.size()];
-		int id = 0;
+        for (DataStorage.Entry<Feature.Data<?>> e : this.dataStorage.baseSeedData) {
+            if (e.data.feature instanceof OldStructure || e.data.feature instanceof Shipwreck) {
+                dataList.add((UniformStructure.Data<?>) e.data);
+            }
+        }
+        List<Feature.Data<?>> cache = new ArrayList<>();
 
-		for(DataStorage.Entry<Feature.Data<?>> entry: this.dataStorage.baseSeedData) {
-			cache[id++] = entry.data;
-		}
+        for (DataStorage.Entry<Feature.Data<?>> entry : this.dataStorage.baseSeedData) {
+            if (!(entry.data.feature instanceof Decorator) || entry.data.feature.getVersion().isOlderThan(MCVersion.v1_18)) {
+                if (!(entry.data.feature instanceof PillagerOutpost)) {
+                    cache.add(entry.data);
+                }
+            }
+        }
+        Log.warn("tmachine.startLifting", dataList.size());
 
-		for(int pillarSeed: this.pillarSeeds) {
-			Log.debug("====================================");
-			Log.warn("Looking for structure seeds with pillar seed [" + pillarSeed + "]...");
+        // You could first lift on 1L<<18 with %2 since that would be a smaller range
+        // Then lift on 1<<19 with those 1<<18 fixed with % 4 and for nextInt(24)
+        // You can even do %8 on 1<<20 (however we included shipwreck so only nextInt(20) so 1<<19 is the max here
+        Stream<Long> lowerBitsStream = LongStream.range(0, 1L << 19).boxed().filter(lowerBits -> {
+            ChunkRand rand = new ChunkRand();
+            for (UniformStructure.Data<?> data : dataList) {
+                rand.setRegionSeed(lowerBits, data.regionX, data.regionZ, data.feature.getSalt(), Config.get().getVersion());
+                if (rand.nextInt(((UniformStructure<?>)data.feature).getOffset()) % 4 != data.offsetX % 4 ||
+                        rand.nextInt(((UniformStructure<?>)data.feature).getOffset()) % 4 != data.offsetZ % 4) {
+                    return false;
+                }
+            }
+            return true;
+        });
 
-			AtomicInteger completion = new AtomicInteger();
-			ProgressListener progressListener = new ProgressListener();
+        Stream<Long> seedStream = lowerBitsStream.flatMap(lowerBits ->
+                LongStream.range(0, 1L << (48 - 19))
+                        .boxed()
+                        .map(upperBits -> (upperBits << 19) | lowerBits)
+        );
 
-			for(int threadId = 0; threadId < 4; threadId++) {
-				int fThreadId = threadId;
+        Stream<Long> strutureSeedStream = seedStream.filter(seed -> {
+            ChunkRand rand = new ChunkRand();
+            for (Feature.Data<?> data : cache) {
+                if (!data.testStart(seed, rand)) {
+                    return false;
+                }
+            }
+            return true;
+        });
 
-				SERVICE.submit(() -> {
-					ChunkRand rand = new ChunkRand();
+        this.structureSeeds = strutureSeedStream.parallel().collect(Collectors.toSet());
 
-					long lower = (long)fThreadId * (1L << 30);
-					long upper = (long)(fThreadId + 1) * (1L << 30);
+        if (!this.structureSeeds.isEmpty()) {
+            Log.warn("tmachine.structureSeedSearchFinished");
+        } else {
+            Log.error("finishedSearchNoResult");
+        }
 
-					for(long partialWorldSeed = lower; partialWorldSeed < upper && !this.shouldTerminate; partialWorldSeed++) {
-						if((partialWorldSeed & ((1 << 27) - 1)) == 0) {
-							progressListener.addPercent(3.125F, true);
-						}
+        return !this.structureSeeds.isEmpty();
+    }
 
-						long seed = this.timeMachine(partialWorldSeed, pillarSeed);
 
-						boolean matches = true;
+    protected boolean pokeStructures() {
+        if (this.pillarSeeds == null || !this.structureSeeds.isEmpty() ||
+                this.dataStorage.getBaseBits() < this.dataStorage.getWantedBits()) return false;
 
-						for(Feature.Data<?> baseSeedDatum: cache) {
-							if(!baseSeedDatum.testStart(seed, rand)) {
-								matches = false;
-								break;
-							}
-						}
+        List<Feature.Data<?>> cache = new ArrayList<>();
 
-						if(matches) {
-							this.structureSeeds.add(seed);
-							Log.printSeed("Found structure seed ${SEED}.", seed);
-						}
-					}
+        for (DataStorage.Entry<Feature.Data<?>> entry : this.dataStorage.baseSeedData) {
+            if (!(entry.data.feature instanceof Decorator) || entry.data.feature.getVersion().isOlderThan(MCVersion.v1_18)) {
+                if (!(entry.data.feature instanceof PillagerOutpost)) {
+                    cache.add(entry.data);
+                }
+            }
+        }
 
-					completion.getAndIncrement();
-				});
-			}
+        for (int pillarSeed : this.pillarSeeds) {
+            Log.debug("====================================");
+            Log.warn("tmachine.lookingForStructureSeeds", pillarSeed);
 
-			while(completion.get() != 4) {
-				try {Thread.sleep(50);}
-				catch(InterruptedException e) {e.printStackTrace();}
+            AtomicInteger completion = new AtomicInteger();
+            ProgressListener progressListener = new ProgressListener();
 
-				if(this.shouldTerminate) {
-					return false;
-				}
-			}
+            for (int threadId = 0; threadId < 4; threadId++) {
+                int fThreadId = threadId;
 
-			progressListener.addPercent(0.0F, true);
-		}
+                SERVICE.submit(() -> {
+                    ChunkRand rand = new ChunkRand();
 
-		if(!this.structureSeeds.isEmpty()) {
-			Log.warn("Finished searching for structure seeds.");
-		} else {
-			Log.error("Finished search with no results.");
-		}
+                    long lower = (long) fThreadId * (1L << 30);
+                    long upper = (long) (fThreadId + 1) * (1L << 30);
 
-		return true;
-	}
+                    for (long partialWorldSeed = lower; partialWorldSeed < upper && !this.shouldTerminate; partialWorldSeed++) {
+                        if ((partialWorldSeed & ((1 << 27) - 1)) == 0) {
+                            progressListener.addPercent(3.125F, true);
+                        }
 
-	protected boolean pokeBiomes() {
-		if(this.structureSeeds == null || this.structureSeeds.isEmpty()|| this.worldSeeds != null)return false;
-		if((this.dataStorage.hashedSeedData == null || this.dataStorage.hashedSeedData.getHashedSeed() == 0) &&
-				(this.dataStorage.biomeSeedData.size() < 5 || this.structureSeeds.size() > 20))return false;
+                        long seed = this.timeMachine(partialWorldSeed, pillarSeed);
 
-		this.worldSeeds = new ArrayList<>();
-		Log.debug("====================================");
+                        boolean matches = true;
 
-		if(this.dataStorage.hashedSeedData != null && this.dataStorage.hashedSeedData.getHashedSeed() != 0) {
-			Log.warn("Looking for world seeds...");
+                        for (Feature.Data<?> baseSeedDatum : cache) {
+                            if (!baseSeedDatum.testStart(seed, rand)) {
+                                matches = false;
+                                break;
+                            }
+                        }
 
-			for(long structureSeed: this.structureSeeds) {
-				WorldSeed.fromHash(structureSeed, this.dataStorage.hashedSeedData.getHashedSeed()).forEach(worldSeed -> {
-					this.worldSeeds.add(worldSeed);
-					Log.printSeed("Found world seed ${SEED}.", worldSeed);
-				});
+                        if (matches) {
+                            this.structureSeeds.add(seed);
+                            Log.printSeed("foundStructureSeed", seed);
+                        }
 
-				if(this.shouldTerminate) {
-					return false;
-				}
-			}
+                    }
 
-			if(!this.worldSeeds.isEmpty()) {
-				Log.warn("Finished searching for world seeds.");
-				return true;
-			} else {
-				Log.error("Finished search with no results, reverting back to biomes.");
-			}
-		}
+                    completion.getAndIncrement();
+                });
+            }
 
-		if(this.dataStorage.biomeSeedData.size() < 5 || this.structureSeeds.size() > 20) return false;
+            while (completion.get() != 4) {
+                try {
+                    Thread.sleep(50);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
 
-		Log.warn("Looking for world seeds with "+ this.dataStorage.biomeSeedData.size() + " biomes...");
-		for(long structureSeed : this.structureSeeds) {
-			for(long upperBits = 0; upperBits < 1 << 16 && !this.shouldTerminate; upperBits++) {
-				long worldSeed = (upperBits << 48) | structureSeed;
+                if (this.shouldTerminate) {
+                    return false;
+                }
+            }
 
-				OverworldBiomeSource source = new OverworldBiomeSource(SeedCracker.MC_VERSION, worldSeed);
+            progressListener.addPercent(0.0F, true);
+        }
 
-				boolean matches = true;
+        if (!this.structureSeeds.isEmpty()) {
+            Log.warn("tmachine.structureSeedSearchFinished");
+        } else {
+            Log.error("finishedSearchNoResult");
+        }
 
-				for(DataStorage.Entry<BiomeData> e: this.dataStorage.biomeSeedData) {
-					if(!e.data.test(source)) {
-						matches = false;
-						break;
-					}
-				}
+        return true;
+    }
 
-				if(matches) {
-					this.worldSeeds.add(worldSeed);
-					if(this.worldSeeds.size() < 10) {
-						Log.printSeed("Found world seed ${SEED}.", worldSeed);
-						if(this.worldSeeds.size() ==9) {
-							Log.warn("[Spam protection] printing all other seeds in console");
-						}
-					}else {
-						System.out.println("Found world seed " + worldSeed);
-					}
-				}
+    protected boolean pokeBiomes() {
+        if (this.structureSeeds.isEmpty() || this.worldSeeds.size() == 1) return false;
+        if (this.structureSeeds.size() > 1000) return false;
 
-				if(this.shouldTerminate) {
-					return false;
-				}
-			}
-		}
+        Log.debug("====================================");
 
-		dispSearchEnd();
-		if(this.worldSeeds.size() != 1) {
-			Log.warn("Looking for world seeds that are possible if the world uses a random seed");
-			for (long structureSeed : this.structureSeeds) {
-				StructureSeed.toRandomWorldSeeds(structureSeed).forEach(s -> {
-					if(this.worldSeeds.contains(s)) {
-						Log.printSeed("Found world seed that also matches biomes ${SEED}.", s);
-					} else {
-						this.worldSeeds.add(s);
-						Log.printSeed("Found world seed ${SEED}.", s);
-					}
-				});
-			}
-			dispSearchEnd();
-		}
+        worldSeeds.clear();
+        dataStorage.baseSeedData.dump();
+        if (Config.get().getVersion().isNewerOrEqualTo(MCVersion.v1_18) && dataStorage.getDecoratorBits() > 32F) {
+            Log.warn("tmachine.decoratorWorldSeedSearch");
+            ChunkRandom rand = new ChunkRandom(new Xoroshiro128PlusPlusRandom(0));
 
-		return true;
-	}
 
-	private void dispSearchEnd() {
-		if(!this.worldSeeds.isEmpty()) {
-			Log.warn("Finished searching for world seeds.");
-		} else {
-			Log.error("Finished search with no results.");
-		}
-	}
+            for (long structureSeed : this.structureSeeds) {
+                for (long upperBits = 0; upperBits < 1 << 16 && !this.shouldTerminate; upperBits++) {
+                    long worldSeed = (upperBits << 48) | structureSeed;
 
-	public long timeMachine(long partialWorldSeed, int pillarSeed) {
-		long currentSeed = 0L;
-		currentSeed |= (partialWorldSeed & 0xFFFF0000L) << 16;
-		currentSeed |= (long)pillarSeed << 16;
-		currentSeed |= partialWorldSeed & 0xFFFFL;
+                    boolean matches = true;
 
-		currentSeed = this.inverseLCG.nextSeed(currentSeed);
-		currentSeed ^= LCG.JAVA.multiplier;
-		return currentSeed;
-	}
+                    for (DataStorage.Entry<Feature.Data<?>> e : this.dataStorage.baseSeedData.getBaseSet()) {
+                        if (e.data.feature instanceof Decorator && !((Decorator.Data<?>) e.data).testStart(worldSeed, rand)) {
+                            matches = false;
+                            break;
+                        }
+                    }
 
-	public enum Phase {
-		BIOMES(null), STRUCTURES(BIOMES), PILLARS(STRUCTURES);
+                    if (matches) {
+                        this.worldSeeds.add(worldSeed);
+                        if (this.worldSeeds.size() < 10) {
+                            Log.printSeed("tmachine.foundWorldSeed", worldSeed);
+                            if (this.worldSeeds.size() == 9) {
+                                Log.warn("tmachine.printSeedsInConsole");
+                            }
+                        } else {
+                            logger.info("Found world seed " + worldSeed);
+                        }
+                    }
 
-		private final Phase nextPhase;
+                    if (this.shouldTerminate) {
+                        return false;
+                    }
+                }
+            }
+            if (!this.worldSeeds.isEmpty()) {
+                Log.warn("tmachine.worldSeedSearchFinished");
+                return true;
+            } else {
+                Log.warn("finishedSearchNoResult");
+            }
 
-		Phase(Phase nextPhase) {
-			this.nextPhase = nextPhase;
-		}
+        }
 
-		public Phase nextPhase() {
-			return this.nextPhase;
-		}
-	}
+        if (this.dataStorage.hashedSeedData != null && this.dataStorage.hashedSeedData.getHashedSeed() != 0) {
+            Log.warn("tmachine.hashedSeedWorldSeedSearch");
+            for (long structureSeed : this.structureSeeds) {
+                WorldSeed.fromHash(structureSeed, this.dataStorage.hashedSeedData.getHashedSeed()).forEach(worldSeed -> {
+                    this.worldSeeds.add(worldSeed);
+                    Log.printSeed("tmachine.foundWorldSeed", worldSeed);
+                });
+
+                if (this.shouldTerminate) {
+                    return false;
+                }
+            }
+
+            if (!this.worldSeeds.isEmpty()) {
+                Log.warn("tmachine.worldSeedSearchFinished");
+                return true;
+            } else {
+                this.dataStorage.hashedSeedData = null;
+                Log.error("tmachine.noResultsRevertingToBiomes");
+            }
+        }
+
+        this.dataStorage.biomeSeedData.dump();
+        if (this.dataStorage.notEnoughBiomeData()) {
+            Log.error("tmachine.moreBiomesNeeded");
+            return false;
+        }
+
+        Log.warn("tmachine.biomeWorldSeedSearch", this.dataStorage.biomeSeedData.size());
+        Log.warn("tmachine.fuzzyBiomeSearch");
+        MCVersion version = Config.get().getVersion();
+        for (long structureSeed : this.structureSeeds) {
+            for (long worldSeed : StructureSeed.toRandomWorldSeeds(structureSeed)) {
+                OverworldBiomeSource source = new OverworldBiomeSource(version, worldSeed);
+
+                boolean matches = true;
+
+                for (DataStorage.Entry<BiomeData> e : this.dataStorage.biomeSeedData) {
+                    if (!e.data.test(source)) {
+                        matches = false;
+                        break;
+                    }
+                }
+
+                if (matches) {
+                    this.worldSeeds.add(worldSeed);
+                    Log.printSeed("tmachine.foundWorldSeed", worldSeed);
+                }
+                if (this.shouldTerminate) {
+                    return false;
+                }
+            }
+        }
+
+        if (!this.worldSeeds.isEmpty()) return true;
+        if (this.structureSeeds.size() > 10) return false;
+        Log.warn("tmachine.deepBiomeSearch");
+        for (long structureSeed : this.structureSeeds) {
+            for (long upperBits = 0; upperBits < 1 << 16 && !this.shouldTerminate; upperBits++) {
+                long worldSeed = (upperBits << 48) | structureSeed;
+
+                OverworldBiomeSource source = new OverworldBiomeSource(version, worldSeed);
+
+                boolean matches = true;
+
+                for (DataStorage.Entry<BiomeData> e : this.dataStorage.biomeSeedData) {
+                    if (!e.data.test(source)) {
+                        matches = false;
+                        break;
+                    }
+                }
+
+                if (matches) {
+                    this.worldSeeds.add(worldSeed);
+                    if (this.worldSeeds.size() < 10) {
+                        Log.printSeed("tmachine.foundWorldSeed", worldSeed);
+                        if (this.worldSeeds.size() == 9) {
+                            Log.warn("tmachine.printSeedsInConsole");
+                        }
+                    } else {
+                        logger.info("Found world seed " + worldSeed);
+                    }
+                }
+
+                if (this.shouldTerminate) {
+                    return false;
+                }
+            }
+        }
+
+        dispSearchEnd();
+
+        if (!this.worldSeeds.isEmpty()) return true;
+
+        Log.error("tmachine.deleteBiomeInformation");
+        this.dataStorage.biomeSeedData.getBaseSet().clear();
+
+        Log.warn("tmachine.randomSeedSearch");
+        for (long structureSeed : this.structureSeeds) {
+            StructureSeed.toRandomWorldSeeds(structureSeed).forEach(s ->
+                    Log.printSeed("tmachine.foundWorldSeed", s));
+
+        }
+
+        return true;
+    }
+
+    protected boolean pokeStructureReduce() {
+        if (shouldTerminate) return false;
+        if (!this.worldSeeds.isEmpty() || this.structureSeeds.size() < 2) return false;
+        if (Config.get().getVersion().isOlderThan(MCVersion.v1_13)) return false;
+
+        Set<Long> result = new HashSet<>();
+        Log.debug("====================================");
+        Log.warn("tmachine.reduceSeeds", this.structureSeeds.size());
+
+        if (this.pillarSeeds != null) {
+            structureSeeds.forEach(seed -> {
+                if (this.pillarSeeds.contains((int) PillarSeed.fromStructureSeed(seed))) {
+                    result.add(seed);
+                }
+            });
+        }
+
+        if (result.size() != 1) {
+            this.dataStorage.baseSeedData.dump();
+            this.dataStorage.baseSeedData.getBaseSet().removeIf(dataEntry -> !dataEntry.data.feature.getVersion().equals(Config.get().getVersion()));
+            List<Feature.Data<?>> cache = new ArrayList<>();
+
+            for (DataStorage.Entry<Feature.Data<?>> entry : this.dataStorage.baseSeedData) {
+                if (!(entry.data.feature instanceof Decorator) || entry.data.feature.getVersion().isOlderThan(MCVersion.v1_18)) {
+                    //todo remove this when libs are updated
+                    if (!(entry.data.feature instanceof PillagerOutpost)) {
+                        cache.add(entry.data);
+                    }
+                }
+            }
+            ChunkRand rand = new ChunkRand();
+
+            for (Long seed : this.structureSeeds) {
+                boolean matches = true;
+
+                for (Feature.Data<?> baseSeedDatum : cache) {
+                    if (!baseSeedDatum.testStart(seed, rand)) {
+                        matches = false;
+                        break;
+                    }
+                }
+
+                if (matches) {
+                    result.add(seed);
+                }
+            }
+        }
+
+        if (!result.isEmpty() && this.structureSeeds.size() > result.size()) {
+            if (result.size() < 10) {
+                result.forEach(seed -> Log.printSeed("foundStructureSeed", seed));
+            } else {
+                Log.warn("tmachine.succeedReducing", result.size());
+            }
+
+            this.structureSeeds = result;
+            return true;
+        } else {
+            Log.warn("tmachine.failedReducing");
+        }
+        return false;
+    }
+
+    private void dispSearchEnd() {
+        if (!this.worldSeeds.isEmpty()) {
+            Log.warn("tmachine.worldSeedSearchFinished");
+        } else {
+            Log.error("finishedSearchNoResult");
+        }
+    }
+
+    public long timeMachine(long partialWorldSeed, int pillarSeed) {
+        long currentSeed = 0L;
+        currentSeed |= (partialWorldSeed & 0xFFFF0000L) << 16;
+        currentSeed |= (long) pillarSeed << 16;
+        currentSeed |= partialWorldSeed & 0xFFFFL;
+
+        currentSeed = this.inverseLCG.nextSeed(currentSeed);
+        currentSeed ^= LCG.JAVA.multiplier;
+        return currentSeed;
+    }
+
+    public enum Phase {
+        BIOMES(null), STRUCURE_REDUCE(BIOMES), STRUCTURES(BIOMES), LIFTING(STRUCURE_REDUCE), PILLARS(STRUCTURES);
+
+        private final Phase nextPhase;
+
+        Phase(Phase nextPhase) {
+            this.nextPhase = nextPhase;
+        }
+
+        public Phase nextPhase() {
+            return this.nextPhase;
+        }
+    }
 
 }

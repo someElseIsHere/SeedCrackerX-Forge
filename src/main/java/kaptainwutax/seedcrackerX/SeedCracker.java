@@ -1,58 +1,43 @@
 package kaptainwutax.seedcrackerX;
 
-import com.seedfinding.mccore.version.MCVersion;
-import kaptainwutax.seedcrackerX.command.ClientCommand;
+import kaptainwutax.seedcrackerX.api.SeedCrackerAPI;
+import kaptainwutax.seedcrackerX.config.Config;
 import kaptainwutax.seedcrackerX.cracker.storage.DataStorage;
 import kaptainwutax.seedcrackerX.finder.FinderQueue;
-import kaptainwutax.seedcrackerX.profile.config.ConfigScreen;
-import kaptainwutax.seedcrackerX.render.RenderQueue;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraftforge.fml.common.Mod;
+import kaptainwutax.seedcrackerX.init.ClientCommands;
+import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.fabricmc.loader.api.FabricLoader;
 
-import static kaptainwutax.seedcrackerX.SeedCracker.modid;
+import java.util.ArrayList;
 
-@Mod(modid)
-public class SeedCracker{
-    public static final String modid = "seedcrackerx";
+public class SeedCracker implements ModInitializer {
 
-    public static MCVersion MC_VERSION = MCVersion.v1_16_5;
-
-    private static final SeedCracker INSTANCE = new SeedCracker();
+    public static final ArrayList<SeedCrackerAPI> entrypoints = new ArrayList<>();
+    private static SeedCracker INSTANCE;
     private final DataStorage dataStorage = new DataStorage();
-    private static boolean active;
-
-    public void SeedCracker() {
-        ConfigScreen.loadConfig();
-        active = ConfigScreen.getConfig().isActive();
-        Features.init(MC_VERSION);
-        RenderQueue.get().add("hand", FinderQueue.get()::renderFinders);
-    }
 
     public static SeedCracker get() {
         return INSTANCE;
+    }
+
+    @Override
+    public void onInitialize() {
+        INSTANCE = this;
+        Config.load();
+        Features.init(Config.get().getVersion());
+        FabricLoader.getInstance().getEntrypointContainers("seedcrackerx", SeedCrackerAPI.class).forEach(entrypoint ->
+                entrypoints.add(entrypoint.getEntrypoint()));
+
+        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> ClientCommands.registerCommands(dispatcher));
     }
 
     public DataStorage getDataStorage() {
         return this.dataStorage;
     }
 
-    public boolean isActive() {
-        return active;
-    }
-
-    public void setActive(boolean active) {
-        if(SeedCracker.active == active) return;
-        SeedCracker.active = active;
-
-        if(active) {
-            ClientCommand.sendFeedback("SeedCracker is active.", TextFormatting.GREEN, true);
-        } else {
-            ClientCommand.sendFeedback("SeedCracker is not active.", TextFormatting.RED, true);
-        }
-    }
-
     public void reset() {
         SeedCracker.get().getDataStorage().clear();
-        FinderQueue.get().clear();
+        FinderQueue.get().finderControl.deleteFinders();
     }
 }

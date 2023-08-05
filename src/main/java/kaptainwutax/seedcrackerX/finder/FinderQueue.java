@@ -1,25 +1,26 @@
 package kaptainwutax.seedcrackerX.finder;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import kaptainwutax.seedcrackerX.SeedCracker;
-import kaptainwutax.seedcrackerX.profile.FinderConfig;
-import kaptainwutax.seedcrackerX.profile.config.ConfigScreen;
+import kaptainwutax.seedcrackerX.config.Config;
+import net.minecraft.client.render.*;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 public class FinderQueue {
 
     private final static FinderQueue INSTANCE = new FinderQueue();
     public static ExecutorService SERVICE = Executors.newFixedThreadPool(5);
 
-    public RenderType renderType = ConfigScreen.getConfig().getRENDER();
-    public FinderConfig finderProfile = new FinderConfig();
+    public FinderControl finderControl = new FinderControl();
 
     private FinderQueue() {
         this.clear();
@@ -30,55 +31,70 @@ public class FinderQueue {
     }
 
     public void onChunkData(World world, ChunkPos chunkPos) {
-        if(!SeedCracker.get().isActive())return;
+        if (!Config.get().active) return;
 
-        this.finderProfile.getActiveFinderTypes().forEach(type -> {
+        getActiveFinderTypes().forEach(type -> {
             SERVICE.submit(() -> {
-               try {
-                   List<Finder> finders = type.finderBuilder.build(world, chunkPos);
+                try {
+                    List<Finder> finders = type.finderBuilder.build(world, chunkPos);
 
-                   finders.forEach(finder -> {
-                       if(finder.isValidDimension(world.dimensionType())) {
-                           finder.findInChunk();
-                           this.finderProfile.addFinder(type, finder);
-                       }
-                   });
-               } catch(Exception e) {
-                   e.printStackTrace();
-               }
+                    finders.forEach(finder -> {
+                        if (finder.isValidDimension(world.getDimension())) {
+                            finder.findInChunk();
+                            this.finderControl.addFinder(type, finder);
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             });
         });
     }
 
-    public void renderFinders(MatrixStack matrixStack) {
-        if(this.renderType == RenderType.OFF)return;
+    public void renderFinders(MatrixStack matrixStack, Camera camera) {
+        if (Config.get().render == Config.RenderType.OFF) return;
 
-        RenderSystem.pushMatrix();
-        RenderSystem.multMatrix(matrixStack.last().pose());
+        matrixStack.push();
 
-        GlStateManager._disableTexture();
+        Vec3d camPos = camera.getPos();
 
-        //Makes it render through blocks.
-        if(this.renderType == RenderType.XRAY) {
-            GlStateManager._disableDepthTest();
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder buffer = tessellator.getBuffer();
+
+        if (Config.get().render == Config.RenderType.XRAY) {
+            RenderSystem.disableDepthTest();
         }
+        RenderSystem.setShader(GameRenderer::getPositionColorProgram);
+        RenderSystem.enableBlend();
+        RenderSystem.blendFuncSeparate(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SrcFactor.ONE, GlStateManager.DstFactor.ZERO);
+        RenderSystem.lineWidth(2.0f);
 
-        this.finderProfile.getActiveFinders().forEach(finder -> {
-            if(finder.shouldRender()) {
-                finder.render();
+        buffer.begin(VertexFormat.DrawMode.DEBUG_LINES, VertexFormats.POSITION_COLOR);
+
+        this.finderControl.getActiveFinders().forEach(finder -> {
+            if (finder.shouldRender()) {
+                finder.render(matrixStack, buffer, camPos);
             }
         });
 
-        RenderSystem.popMatrix();
+        if (buffer.isBuilding()) {
+            tessellator.draw();
+        }
+        RenderSystem.enableDepthTest();
+        RenderSystem.disableBlend();
+
+        matrixStack.pop();
+        RenderSystem.applyModelViewMatrix();
+    }
+
+    public List<Finder.Type> getActiveFinderTypes() {
+        return Arrays.stream(Finder.Type.values())
+                .filter(type -> type.enabled.get())
+                .collect(Collectors.toList());
     }
 
     public void clear() {
-        this.renderType = ConfigScreen.getConfig().getRENDER();
-        this.finderProfile = new FinderConfig();
-    }
-
-    public enum RenderType {
-        OFF, ON, XRAY
+        this.finderControl = new FinderControl();
     }
 
 }

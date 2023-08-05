@@ -1,11 +1,12 @@
 package kaptainwutax.seedcrackerX.command;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import kaptainwutax.seedcrackerX.finder.FinderQueue;
-import net.minecraft.command.CommandSource;
-import net.minecraft.util.text.TextFormatting;
+import kaptainwutax.seedcrackerX.config.Config;
+import kaptainwutax.seedcrackerX.util.Log;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.util.Formatting;
 
-import static net.minecraft.command.Commands.literal;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
 public class RenderCommand extends ClientCommand {
 
@@ -15,12 +16,12 @@ public class RenderCommand extends ClientCommand {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<CommandSource> builder) {
+    public void build(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
         builder.then(literal("outlines")
                 .executes(context -> this.printRenderMode())
         );
 
-        for(FinderQueue.RenderType renderType: FinderQueue.RenderType.values()) {
+        for (Config.RenderType renderType : Config.RenderType.values()) {
             builder.then(literal("outlines")
                     .then(literal(renderType.toString()).executes(context -> this.setRenderMode(renderType)))
             );
@@ -28,13 +29,14 @@ public class RenderCommand extends ClientCommand {
     }
 
     private int printRenderMode() {
-        sendFeedback("Current render mode is set to [" + FinderQueue.get().renderType + "].", TextFormatting.AQUA, false);
+        sendFeedback(Log.translate("render.getRenderMode") + " [" + Config.get().render + "].", Formatting.AQUA, false);
         return 0;
     }
 
-    private int setRenderMode(FinderQueue.RenderType renderType) {
-        FinderQueue.get().renderType = renderType;
-        sendFeedback("Set render mode to [" + FinderQueue.get().renderType + "].", TextFormatting.AQUA, false);
+    private int setRenderMode(Config.RenderType renderType) {
+        Config.get().render = renderType;
+        Config.save();
+        sendFeedback(Log.translate("render.setRenderMode") + " [" + Config.get().render + "].", Formatting.AQUA, false);
         return 0;
     }
 

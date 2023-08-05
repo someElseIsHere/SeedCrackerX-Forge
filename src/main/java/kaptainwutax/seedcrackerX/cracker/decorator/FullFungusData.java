@@ -14,11 +14,11 @@ public class FullFungusData {
     public final ArrayList<Integer> layerSizes = new ArrayList<>();
     public final int[][][] layers;
     public final ArrayList<Integer> vines = new ArrayList<>();
+    public final ArrayList<Integer> bigtrunkData = new ArrayList<>();
+    public final int estimatedData;
     public boolean big;
     public int height;
     public int vineLayerSize;
-    public final ArrayList<Integer> bigtrunkData = new ArrayList<>();
-    public final int estimatedData;
 
     public FullFungusData(List<Integer> layerSizes, int[][][] layers, ArrayList<Integer> vines, boolean big, int height, int vineLayerSize, ArrayList<Integer> bigTrunkData, int estimatedData) {
         this.layerSizes.addAll(layerSizes);
@@ -36,9 +36,9 @@ public class FullFungusData {
         int data = 0;
         FullFungusData out = null;
 
-        for(FullFungusData fungus:fungusList) {
+        for (FullFungusData fungus : fungusList) {
             int fungusData = fungus.estimatedData;
-            if(fungusData>data) {
+            if (fungusData > data) {
                 data = fungusData;
                 out = fungus;
             }
@@ -49,128 +49,127 @@ public class FullFungusData {
 
     public LongStream crackSeed() {
         int doppelt = 0;
-        if(height > 7 && height % 2 == 0) {
+        if (height > 7 && height % 2 == 0) {
             doppelt = 1;
-            if(height > 13){
+            if (height > 13) {
                 doppelt = 2;
             }
         }
 
-        DynamicProgram dynamicProgram = DynamicProgram.create(LCG.JAVA);
-        if(doppelt < 2) {
-            dynamicProgram.skip(2);
+        DynamicProgram device = DynamicProgram.create(LCG.JAVA);
+        if (doppelt < 2) {
+            device.skip(2);
         } else {
-            dynamicProgram.skip(1);
-            dynamicProgram.add(JavaCalls.nextInt(12).equalTo(0));
+            device.skip(1);
+            device.add(JavaCalls.nextInt(12).equalTo(0));
         }
-        if(big){
-            dynamicProgram.add(JavaCalls.nextFloat().lessThan(0.06F));
+        if (big) {
+            device.add(JavaCalls.nextFloat().betweenII(0F, 0.06F));
         } else {
-            dynamicProgram.skip(1);
+            device.skip(1);
         }
 
-        if(big) {
-            for (int blockdata:bigtrunkData) {
-                if(blockdata == 0) {
-                    dynamicProgram.skip(1);
+        if (big) {
+            for (int blockdata : bigtrunkData) {
+                if (blockdata == 0) {
+                    device.skip(1);
                 } else if (blockdata == 1) {
-                    dynamicProgram.add(JavaCalls.nextFloat().lessThan(0.1F));
+                    device.add(JavaCalls.nextFloat().betweenII(0F, 0.1F));
                 }
-                System.out.println(blockdata);
             }
         }
 
-        dynamicProgram.skip(2);
+        device.skip(2);
 
         ArrayList<Integer> done = new ArrayList<>();
-        for (int j= 3;j > 0;j--) {
+        for (int j = 3; j > 0; j--) {
 
-            for (int i = 0; i < vineLayerSize*8; i++) {
-                if(vines.get(i) == 0 && !done.contains(i)) {
-                    dynamicProgram.skip(1);
+            for (int i = 0; i < vineLayerSize * 8; i++) {
+                if (vines.get(i) == 0 && !done.contains(i)) {
+                    device.skip(1);
 
                 } else if (vines.get(i) == j) {
                     done.add(i);
-                    dynamicProgram.add(JavaCalls.nextFloat().lessThan(0.15F));
+                    device.add(JavaCalls.nextFloat().betweenII(0F, 0.15F));
 
-                }else if(!done.contains(i)) {
-                    dynamicProgram.skip(1);
+                } else if (!done.contains(i)) {
+                    device.skip(1);
 
                 }
             }
 
-            dynamicProgram.skip(1);
+            device.skip(1);
         }
         int relativePos;
         int blockType;
         int layer = 0;
 
-        for(int size:layerSizes) {
-            size *=2;
+        for (int size : layerSizes) {
+            size *= 2;
 
-            for(int x = 0; x <= size; x++) {
+            for (int x = 0; x <= size; x++) {
 
                 boolean siteX = x == 0 || x == size;
                 for (int z = 0; z <= size; z++) {
 
                     boolean siteZ = z == 0 || z == size;
 
-                    relativePos = (siteX ? 1:0) + (siteZ ? 1:0);
+                    relativePos = (siteX ? 1 : 0) + (siteZ ? 1 : 0);
 
                     blockType = layers[layer][x][z];
 
-                    generateBlock(relativePos,blockType,dynamicProgram);
+                    generateBlock(relativePos, blockType, device);
                 }
             }
 
-            dynamicProgram.skip(1);
+            device.skip(1);
             layer++;
         }
-        return dynamicProgram.reverse();
+        return device.reverse();
     }
 
-    private void generateBlock(int relativePos, int blockType, DynamicProgram dynamicProgram) {
+    private void generateBlock(int relativePos, int blockType, DynamicProgram device) {
 
-        if(blockType == 3) return;
+        if (blockType == 3) return;
         switch (relativePos) {
             case 0:
                 //Inside
                 switch (blockType) {
                     case 0:
-                        dynamicProgram.skip(2);
+                        device.skip(2);
                         break;
                     case 1:
-                        dynamicProgram.skip(3);
+                        device.skip(3);
                         break;
                     case 2:
-                        dynamicProgram.add(JavaCalls.nextFloat().lessThan(0.1F));
+                        device.add(JavaCalls.nextFloat().betweenII(0F, 0.1F));
                 }
                 break;
             case 1:
                 //Wall
                 switch (blockType) {
                     case 0:
-                        dynamicProgram.skip(1);
-                        dynamicProgram.add(JavaCalls.nextFloat().greaterThanEqual(0.98F));
+                        device.skip(1);
+                        device.add(JavaCalls.nextFloat().betweenII(0.98F, 1F));
                         break;
                     case 1:
-                        dynamicProgram.skip(3);
+                        device.skip(3);
                         break;
                     case 2:
-                        dynamicProgram.add(JavaCalls.nextFloat().lessThan(5.0E-4F));
+                        device.add(JavaCalls.nextFloat().betweenII(0F, 5.0E-4F));
                 }
                 break;
             case 2:
                 //Corner
                 switch (blockType) {
                     case 0:
-                        dynamicProgram.skip(2);
+                        device.skip(2);
                         break;
                     case 1:
-                        dynamicProgram.skip(3);
+                        device.skip(3);
                         break;
                     case 2:
-                        dynamicProgram.add(JavaCalls.nextFloat().lessThan(0.01F));
+                        device.add(JavaCalls.nextFloat().betweenII(0F, 0.01F));
                 }
                 break;
         }

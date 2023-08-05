@@ -1,9 +1,12 @@
 package kaptainwutax.seedcrackerX.mixin;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import kaptainwutax.seedcrackerX.render.RenderQueue;
-import net.minecraft.client.renderer.GameRenderer;
+import kaptainwutax.seedcrackerX.finder.FinderQueue;
+import net.minecraft.client.render.Camera;
+import net.minecraft.client.render.GameRenderer;
+import net.minecraft.client.util.math.MatrixStack;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -11,14 +14,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(GameRenderer.class)
 public abstract class GameRendererMixin {
 
-    @Inject(method = "renderLevel", at = @At("HEAD"))
-    private void renderWorldStart(float delta, long time, MatrixStack matrixStack, CallbackInfo ci) {
-        RenderQueue.get().setTrackRender(matrixStack);
-    }
+    @Shadow
+    @Final
+    private Camera camera;
 
-    @Inject(method = "renderLevel", at = @At("TAIL"))
-    private void renderWorldFinish(float delta, long time, MatrixStack matrixStack, CallbackInfo ci) {
-        RenderQueue.get().setTrackRender(matrixStack);
+    @Inject(method = "renderWorld", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiler/Profiler;swap(Ljava/lang/String;)V", args = {"ldc=hand"}))
+    private void renderWorldHand(float delta, long time, MatrixStack matrixStack, CallbackInfo ci) {
+        FinderQueue.get().renderFinders(matrixStack, camera);
     }
 
 }

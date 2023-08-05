@@ -13,27 +13,30 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.dimension.DimensionType;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class EndGatewayFinder extends BlockFinder {
 
-    protected static List<BlockPos> SEARCH_POSITIONS = buildSearchPositions(CHUNK_POSITIONS, pos -> {
-        return false;
-    });
-
     public EndGatewayFinder(World world, ChunkPos chunkPos) {
         super(world, chunkPos, Blocks.END_GATEWAY);
-        this.searchPositions = SEARCH_POSITIONS;
+        this.searchPositions = CHUNK_POSITIONS;
+    }
+
+    public static List<Finder> create(World world, ChunkPos chunkPos) {
+        List<Finder> finders = new ArrayList<>();
+        finders.add(new EndGatewayFinder(world, chunkPos));
+        return finders;
     }
 
     @Override
     public List<BlockPos> findInChunk() {
-        Biome biome = this.world.getNoiseBiome((this.chunkPos.x << 2) + 2, 0, (this.chunkPos.z << 2) + 2);
+        Biome biome = this.world.getBiomeForNoiseGen((this.chunkPos.x << 2) + 2, 64, (this.chunkPos.z << 2) + 2).value();
+        if(!Features.END_GATEWAY.isValidBiome(BiomeFixer.swap(biome)))return new ArrayList<>();
 
         List<BlockPos> result = super.findInChunk();
         List<BlockPos> newResult = new ArrayList<>();
@@ -41,13 +44,13 @@ public class EndGatewayFinder extends BlockFinder {
         result.forEach(pos -> {
             int height = this.findHeight(pos);
 
-            if(height >= 3 && height <= 9 && Features.END_GATEWAY.isValidBiome(BiomeFixer.swap(biome))) {
+            if (height >= 3 && height <= 9) {
                 newResult.add(pos);
 
                 EndGateway.Data data = Features.END_GATEWAY.at(pos.getX(), pos.getZ(), height);
 
-                if(SeedCracker.get().getDataStorage().addBaseData(data, DataAddedEvent.POKE_STRUCTURES)) {
-                    this.renderers.add(new Cuboid(pos.offset(-1, -2, -1), pos.offset(2, 3, 2), new Color(102, 102, 210)));
+                if (SeedCracker.get().getDataStorage().addBaseData(data, DataAddedEvent.POKE_STRUCTURES)) {
+                    this.renderers.add(new Cuboid(pos.add(-1, -2, -1), pos.add(2, 3, 2), new Color(102, 102, 210)));
                 }
             }
         });
@@ -58,14 +61,14 @@ public class EndGatewayFinder extends BlockFinder {
     private int findHeight(BlockPos pos) {
         int height = 0;
 
-        while(pos.getY() >= 0) {
-            pos = pos.below();
+        while (pos.getY() >= 0) {
+            pos = pos.down();
             height++;
 
             BlockState state = this.world.getBlockState(pos);
 
             //Bedrock generates below gateways.
-            if(state.getBlock() == Blocks.BEDROCK || state.getBlock() != Blocks.END_STONE) {
+            if (state.getBlock() == Blocks.BEDROCK || state.getBlock() != Blocks.END_STONE) {
                 continue;
             }
 
@@ -78,12 +81,6 @@ public class EndGatewayFinder extends BlockFinder {
     @Override
     public boolean isValidDimension(DimensionType dimension) {
         return this.isEnd(dimension);
-    }
-
-    public static List<Finder> create(World world, ChunkPos chunkPos) {
-        List<Finder> finders = new ArrayList<>();
-        finders.add(new EndGatewayFinder(world, chunkPos));
-        return finders;
     }
 
 }

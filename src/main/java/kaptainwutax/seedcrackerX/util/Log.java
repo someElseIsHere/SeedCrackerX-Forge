@@ -1,10 +1,10 @@
 package kaptainwutax.seedcrackerX.util;
 
-import net.minecraft.client.Minecraft;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.text.*;
-import net.minecraft.util.text.event.ClickEvent;
-import net.minecraft.util.text.event.HoverEvent;
+import net.minecraft.text.*;
+import net.minecraft.util.Formatting;
+import net.minecraft.util.Language;
 
 import java.util.regex.Pattern;
 
@@ -13,54 +13,66 @@ public class Log {
     public static void debug(String message) {
         PlayerEntity player = getPlayer();
 
-        if(player != null) {
-            schedule(() -> player.displayClientMessage(new StringTextComponent(message), false));
+        if (player != null) {
+            schedule(() -> player.sendMessage(Text.literal(message), false));
         }
     }
 
-    public static void warn(String message) {
+    public static void warn(String translateKey, Object... args) {
+        String message = translate(translateKey).formatted(args);
         PlayerEntity player = getPlayer();
 
-        if(player != null) {
-            schedule(() -> player.displayClientMessage(new StringTextComponent(message).withStyle(TextFormatting.GREEN), false));
+        if (player != null) {
+            schedule(() -> player.sendMessage(Text.literal(message).formatted(Formatting.GREEN), false));
         }
     }
 
-    public static void error(String message) {
+    public static void warn(String translateKey) {
+        warn(translateKey, new Object[]{});
+    }
+
+    public static void error(String translateKey) {
+        String message = translate(translateKey);
         PlayerEntity player = getPlayer();
 
-        if(player != null) {
-            schedule(() -> player.displayClientMessage(new StringTextComponent(message).withStyle(TextFormatting.RED), false));
+        if (player != null) {
+            schedule(() -> player.sendMessage(Text.literal(message).formatted(Formatting.RED), false));
         }
     }
 
-    public static void printSeed(String message, long seedValue) {
+    public static void printSeed(String translateKey, long seedValue) {
+        String message = translate(translateKey);
         String[] data = message.split(Pattern.quote("${SEED}"));
         String seed = String.valueOf(seedValue);
-        ITextComponent text = TextComponentUtils.wrapInSquareBrackets((new StringTextComponent(seed)).withStyle(style -> style.withColor(TextFormatting.GREEN).withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, seed)).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TranslationTextComponent("chat.copy.click"))).withInsertion(seed)));
+        Text text = Texts.bracketed((Text.literal(seed)).styled(style -> style.withColor(Formatting.GREEN).withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, seed)).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("chat.copy.click"))).withInsertion(seed)));
 
         PlayerEntity player = getPlayer();
 
-        if(player != null) {
-            schedule(() -> player.displayClientMessage(new StringTextComponent(data[0]).append(text).append(new StringTextComponent(data[1])), false));
+        if (player != null) {
+            schedule(() -> player.sendMessage(Text.literal(data[0]).append(text).append(Text.literal(data[1])), false));
         }
     }
+
     public static void printDungeonInfo(String message) {
-        ITextComponent text = TextComponentUtils.wrapInSquareBrackets((new StringTextComponent(message)).withStyle(style -> style.withColor(TextFormatting.GREEN).withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, message)).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TranslationTextComponent("chat.copy.click"))).withInsertion(message)));
+        Text text = Texts.bracketed((Text.literal(message)).styled(style -> style.withColor(Formatting.GREEN).withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, message)).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("chat.copy.click"))).withInsertion(message)));
 
         PlayerEntity player = getPlayer();
 
-        if(player != null) {
-            schedule(() -> player.displayClientMessage(text,false));
+        if (player != null) {
+            schedule(() -> player.sendMessage(text, false));
         }
+    }
+
+    public static String translate(String translateKey) {
+        return Language.getInstance().get(translateKey);
     }
 
     private static void schedule(Runnable runnable) {
-        Minecraft.getInstance().execute(runnable);
+        MinecraftClient.getInstance().execute(runnable);
     }
 
     private static PlayerEntity getPlayer() {
-        return Minecraft.getInstance().player;
+        return MinecraftClient.getInstance().player;
     }
 
 }

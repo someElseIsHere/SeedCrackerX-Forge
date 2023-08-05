@@ -3,7 +3,7 @@ package kaptainwutax.seedcrackerX.cracker;
 import com.seedfinding.mcbiome.biome.Biome;
 import com.seedfinding.mcbiome.source.BiomeSource;
 import com.seedfinding.mccore.version.MCVersion;
-import kaptainwutax.seedcrackerX.SeedCracker;
+import kaptainwutax.seedcrackerX.config.Config;
 
 public class BiomeData {
 
@@ -18,18 +18,18 @@ public class BiomeData {
     }
 
     public boolean test(BiomeSource source) {
-        if(SeedCracker.MC_VERSION.isNewerOrEqualTo(MCVersion.v1_15)) {
+        if (Config.get().getVersion().isNewerOrEqualTo(MCVersion.v1_15)) {
             return source.getBiomeForNoiseGen(this.x, 0, this.z) == this.biome;
-        }else {
+        } else {
             return source.getBiome(this.x, 0, this.z) == this.biome;
         }
     }
 
     @Override
     public boolean equals(Object o) {
-        if(this == o) return true;
-        if(!(o instanceof BiomeData))return false;
-        BiomeData data = (BiomeData)o;
+        if (this == o) return true;
+        if (!(o instanceof BiomeData)) return false;
+        BiomeData data = (BiomeData) o;
         return this.biome == data.biome;
     }
 
