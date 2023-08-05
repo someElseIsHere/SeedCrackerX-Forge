@@ -1,12 +1,13 @@
 package kaptainwutax.seedcrackerX.render;
 
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3i;
+
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 
 public class Cube extends Cuboid {
 
     public Cube() {
-        this(BlockPos.ORIGIN, Color.WHITE);
+        this(BlockPos.ZERO, Color.WHITE);
     }
 
     public Cube(BlockPos pos) {

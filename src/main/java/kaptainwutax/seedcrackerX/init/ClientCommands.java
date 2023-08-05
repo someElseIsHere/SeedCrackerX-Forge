@@ -1,8 +1,7 @@
 package kaptainwutax.seedcrackerX.init;
 
-import com.mojang.brigadier.CommandDispatcher;
 import kaptainwutax.seedcrackerX.command.*;
-import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraftforge.client.ClientCommandHandler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,8 +29,8 @@ public class ClientCommands {
         COMMANDS.add(DATABASE = new DatabaseCommand());
     }
 
-    public static void registerCommands(CommandDispatcher<FabricClientCommandSource> dispatcher) {
-        COMMANDS.forEach(clientCommand -> clientCommand.register(dispatcher));
+    public static void registerCommands() {
+        COMMANDS.forEach(clientCommand -> clientCommand.register(ClientCommandHandler.getDispatcher()));
     }
 
 }

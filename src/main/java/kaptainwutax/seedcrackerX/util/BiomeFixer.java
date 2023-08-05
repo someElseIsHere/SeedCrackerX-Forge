@@ -2,13 +2,12 @@ package kaptainwutax.seedcrackerX.util;
 
 import com.seedfinding.mcbiome.biome.Biome;
 import com.seedfinding.mcbiome.biome.Biomes;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.registry.BuiltinRegistries;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.util.Identifier;
-import net.minecraft.world.biome.BiomeKeys;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.data.registries.VanillaRegistries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -47,23 +46,23 @@ public class BiomeFixer {
         //deep_dark
     }
 
-    public static Biome swap(net.minecraft.world.biome.Biome biome) {
-        ClientPlayNetworkHandler networkHandler = MinecraftClient.getInstance().getNetworkHandler();
+    public static Biome swap(net.minecraft.world.level.biome.Biome biome) {
+        ClientPacketListener networkHandler = Minecraft.getInstance().getConnection();
         if (networkHandler == null) return Biomes.VOID;
 
-        Identifier biomeID = networkHandler.getRegistryManager().get(RegistryKeys.BIOME).getId(biome);
+        ResourceLocation biomeID = networkHandler.registryAccess().registryOrThrow(Registries.BIOME).getKey(biome);
 
         if (biomeID == null) return Biomes.THE_VOID;
 
         return COMPATREGISTRY.getOrDefault(biomeID.getPath(), Biomes.VOID);
     }
 
-    public static net.minecraft.world.biome.Biome swap(Biome biome) {
+    public static net.minecraft.world.level.biome.Biome swap(Biome biome) {
         // internal, meh
-        var biomeRegistries = BuiltinRegistries.createWrapperLookup().getWrapperOrThrow(RegistryKeys.BIOME);
+        var biomeRegistries = VanillaRegistries.createLookup().lookupOrThrow(Registries.BIOME);
 
-        return biomeRegistries.getOptional(RegistryKey.of(RegistryKeys.BIOME, new Identifier(biome.getName()))).orElse(
-                biomeRegistries.getOrThrow(BiomeKeys.THE_VOID)
+        return biomeRegistries.get(ResourceKey.create(Registries.BIOME, new ResourceLocation(biome.getName()))).orElse(
+                biomeRegistries.getOrThrow(net.minecraft.world.level.biome.Biomes.THE_VOID)
         ).value();
     }
 }

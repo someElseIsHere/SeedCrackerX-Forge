@@ -1,21 +1,21 @@
 package kaptainwutax.seedcrackerX.render;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.Vec3;
 
 public abstract class Renderer {
 
-    protected MinecraftClient mc = MinecraftClient.getInstance();
+    protected Minecraft mc = Minecraft.getInstance();
 
-    public abstract void render(MatrixStack matrixStack, VertexConsumer vertexConsumer, Vec3d cameraPos);
+    public abstract void render(PoseStack matrixStack, VertexConsumer vertexConsumer, Vec3 cameraPos);
 
     public abstract BlockPos getPos();
 
-    protected Vec3d toVec3d(BlockPos pos) {
-        return new Vec3d(pos.getX(), pos.getY(), pos.getZ());
+    protected Vec3 toVec3d(BlockPos pos) {
+        return new Vec3(pos.getX(), pos.getY(), pos.getZ());
     }
 
 }

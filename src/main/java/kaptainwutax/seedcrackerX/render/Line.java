@@ -1,39 +1,39 @@
 package kaptainwutax.seedcrackerX.render;
 
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.Vec3;
 
 public class Line extends Renderer {
 
-    public Vec3d start;
-    public Vec3d end;
+    public Vec3 start;
+    public Vec3 end;
     public Color color;
 
     public Line() {
-        this(Vec3d.ZERO, Vec3d.ZERO, Color.WHITE);
+        this(Vec3.ZERO, Vec3.ZERO, Color.WHITE);
     }
 
-    public Line(Vec3d start, Vec3d end) {
+    public Line(Vec3 start, Vec3 end) {
         this(start, end, Color.WHITE);
     }
 
-    public Line(Vec3d start, Vec3d end, Color color) {
+    public Line(Vec3 start, Vec3 end, Color color) {
         this.start = start;
         this.end = end;
         this.color = color;
     }
 
     @Override
-    public void render(MatrixStack matrixStack, VertexConsumer vertexConsumer, Vec3d cameraPos) {
+    public void render(PoseStack matrixStack, VertexConsumer vertexConsumer, Vec3 cameraPos) {
         this.putVertex(vertexConsumer, matrixStack, this.start, cameraPos);
         this.putVertex(vertexConsumer, matrixStack, this.end, cameraPos);
     }
 
-    protected void putVertex(VertexConsumer vertexConsumer, MatrixStack matrixStack, Vec3d pos, Vec3d cameraPos) {
+    protected void putVertex(VertexConsumer vertexConsumer, PoseStack matrixStack, Vec3 pos, Vec3 cameraPos) {
         vertexConsumer.vertex(
-                matrixStack.peek().getPositionMatrix(),
+                matrixStack.last().pose(),
                 (float) (pos.x - cameraPos.x),
                 (float) (pos.y - cameraPos.y),
                 (float) (pos.z - cameraPos.z)
@@ -42,15 +42,15 @@ public class Line extends Renderer {
                 this.color.getFGreen(),
                 this.color.getFBlue(),
                 1.0F
-        ).next();
+        ).endVertex();
     }
 
     @Override
     public BlockPos getPos() {
-        double x = (this.end.getX() - this.start.getX()) / 2 + this.start.getX();
-        double y = (this.end.getY() - this.start.getY()) / 2 + this.start.getY();
-        double z = (this.end.getZ() - this.start.getZ()) / 2 + this.start.getZ();
-        return BlockPos.ofFloored(x, y, z);
+        double x = (this.end.x() - this.start.x()) / 2 + this.start.x();
+        double y = (this.end.y() - this.start.y()) / 2 + this.start.y();
+        double z = (this.end.z() - this.start.z()) / 2 + this.start.z();
+        return BlockPos.containing(x, y, z);
     }
 
 }

@@ -2,12 +2,13 @@ package kaptainwutax.seedcrackerX.finder;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.*;
 import kaptainwutax.seedcrackerX.config.Config;
-import net.minecraft.client.render.*;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
+import net.minecraft.client.Camera;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.Arrays;
 import java.util.List;
@@ -30,7 +31,7 @@ public class FinderQueue {
         return INSTANCE;
     }
 
-    public void onChunkData(World world, ChunkPos chunkPos) {
+    public void onChunkData(Level world, ChunkPos chunkPos) {
         if (!Config.get().active) return;
 
         getActiveFinderTypes().forEach(type -> {
@@ -39,7 +40,7 @@ public class FinderQueue {
                     List<Finder> finders = type.finderBuilder.build(world, chunkPos);
 
                     finders.forEach(finder -> {
-                        if (finder.isValidDimension(world.getDimension())) {
+                        if (finder.isValidDimension(world.dimensionType())) {
                             finder.findInChunk();
                             this.finderControl.addFinder(type, finder);
                         }
@@ -51,25 +52,25 @@ public class FinderQueue {
         });
     }
 
-    public void renderFinders(MatrixStack matrixStack, Camera camera) {
+    public void renderFinders(PoseStack matrixStack, Camera camera) {
         if (Config.get().render == Config.RenderType.OFF) return;
 
-        matrixStack.push();
+        matrixStack.pushPose();
 
-        Vec3d camPos = camera.getPos();
+        Vec3 camPos = camera.getPosition();
 
-        Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder buffer = tessellator.getBuffer();
+        Tesselator tessellator = Tesselator.getInstance();
+        BufferBuilder buffer = tessellator.getBuilder();
 
         if (Config.get().render == Config.RenderType.XRAY) {
             RenderSystem.disableDepthTest();
         }
-        RenderSystem.setShader(GameRenderer::getPositionColorProgram);
+        RenderSystem.setShader(GameRenderer::getPositionColorShader);
         RenderSystem.enableBlend();
-        RenderSystem.blendFuncSeparate(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SrcFactor.ONE, GlStateManager.DstFactor.ZERO);
+        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
         RenderSystem.lineWidth(2.0f);
 
-        buffer.begin(VertexFormat.DrawMode.DEBUG_LINES, VertexFormats.POSITION_COLOR);
+        buffer.begin(VertexFormat.Mode.DEBUG_LINES, DefaultVertexFormat.POSITION_COLOR);
 
         this.finderControl.getActiveFinders().forEach(finder -> {
             if (finder.shouldRender()) {
@@ -77,13 +78,13 @@ public class FinderQueue {
             }
         });
 
-        if (buffer.isBuilding()) {
-            tessellator.draw();
+        if (buffer.building()) {
+            tessellator.end();
         }
         RenderSystem.enableDepthTest();
         RenderSystem.disableBlend();
 
-        matrixStack.pop();
+        matrixStack.popPose();
         RenderSystem.applyModelViewMatrix();
     }
 

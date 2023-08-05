@@ -11,8 +11,8 @@ import com.seedfinding.mcseed.lcg.LCG;
 import kaptainwutax.seedcrackerX.cracker.storage.DataStorage;
 import kaptainwutax.seedcrackerX.cracker.storage.TimeMachine;
 import kaptainwutax.seedcrackerX.util.Log;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.random.ChunkRandom;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.levelgen.WorldgenRandom;
 
 import java.util.*;
 
@@ -39,7 +39,7 @@ public class WarpedFungus extends Decorator<Decorator.Config, WarpedFungus.Data>
     }
 
     @Override
-    public boolean canStart(WarpedFungus.Data data, long structureSeed, ChunkRandom rand) {
+    public boolean canStart(WarpedFungus.Data data, long structureSeed, WorldgenRandom rand) {
         return true;
     }
 

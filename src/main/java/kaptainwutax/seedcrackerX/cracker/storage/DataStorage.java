@@ -12,8 +12,8 @@ import kaptainwutax.seedcrackerX.cracker.HashedSeedData;
 import kaptainwutax.seedcrackerX.cracker.PillarData;
 import kaptainwutax.seedcrackerX.cracker.decorator.*;
 import kaptainwutax.seedcrackerX.finder.BlockUpdateQueue;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
 
 import java.util.Comparator;
 import java.util.Set;
@@ -69,8 +69,8 @@ public class DataStorage {
     public void tick() {
         if (openGui) {
             ConfigScreen configscreen = new ConfigScreen();
-            Screen screen = configscreen.getConfigScreenByCloth(MinecraftClient.getInstance().currentScreen);
-            MinecraftClient.getInstance().setScreen(screen);
+            Screen screen = configscreen.getConfigScreenByCloth(Minecraft.getInstance().screen);
+            Minecraft.getInstance().setScreen(screen);
             openGui = false;
         }
         if (!this.timeMachine.isRunning) {

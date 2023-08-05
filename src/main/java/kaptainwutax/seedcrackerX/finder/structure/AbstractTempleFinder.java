@@ -4,13 +4,13 @@ import kaptainwutax.seedcrackerX.finder.Finder;
 import kaptainwutax.seedcrackerX.render.Color;
 import kaptainwutax.seedcrackerX.render.Cube;
 import kaptainwutax.seedcrackerX.render.Cuboid;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3i;
-import net.minecraft.world.World;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.dimension.DimensionType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,10 +23,10 @@ public abstract class AbstractTempleFinder extends Finder {
     protected final Vec3i size;
     protected List<PieceFinder> finders = new ArrayList<>();
 
-    public AbstractTempleFinder(World world, ChunkPos chunkPos, Vec3i size) {
+    public AbstractTempleFinder(Level world, ChunkPos chunkPos, Vec3i size) {
         super(world, chunkPos);
 
-        Direction.Type.HORIZONTAL.forEach(direction -> {
+        Direction.Plane.HORIZONTAL.forEach(direction -> {
             PieceFinder finder = new PieceFinder(world, chunkPos, direction, size);
 
             finder.searchPositions = SEARCH_POSITIONS;
@@ -48,7 +48,7 @@ public abstract class AbstractTempleFinder extends Finder {
     }
 
     public List<BlockPos> findInChunkPiece(PieceFinder pieceFinder) {
-        Biome biome = this.world.getBiomeForNoiseGen((this.chunkPos.x << 2) + 2, 64, (this.chunkPos.z << 2) + 2).value();
+        Biome biome = this.world.getNoiseBiome((this.chunkPos.x << 2) + 2, 64, (this.chunkPos.z << 2) + 2).value();
 
         if (!isValidBiome(biome)) {
             return new ArrayList<>();

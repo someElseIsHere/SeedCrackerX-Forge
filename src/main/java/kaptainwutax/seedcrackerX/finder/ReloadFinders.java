@@ -4,12 +4,12 @@ import kaptainwutax.seedcrackerX.finder.decorator.EndPillarsFinder;
 import kaptainwutax.seedcrackerX.finder.decorator.ore.EmeraldOreFinder;
 import kaptainwutax.seedcrackerX.finder.structure.*;
 import kaptainwutax.seedcrackerX.util.HeightContext;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.ChunkPos;
 
 public class ReloadFinders {
-    public MinecraftClient client = MinecraftClient.getInstance();
+    public Minecraft client = Minecraft.getInstance();
 
     public static void reloadHeight(int minY, int maxY) {
         Finder.CHUNK_POSITIONS.clear();
@@ -33,13 +33,13 @@ public class ReloadFinders {
     }
 
     public void reload() {
-        int renderdistance = client.options.getViewDistance().getValue();
+        int renderdistance = client.options.renderDistance().get();
 
         int playerChunkX = (int) (Math.round(client.player.getX()) >> 4);
         int playerChunkZ = (int) (Math.round(client.player.getZ()) >> 4);
         for (int i = playerChunkX - renderdistance; i < playerChunkX + renderdistance; i++) {
             for (int j = playerChunkZ - renderdistance; j < playerChunkZ + renderdistance; j++) {
-                FinderQueue.get().onChunkData(client.world, new ChunkPos(i, j));
+                FinderQueue.get().onChunkData(client.level, new ChunkPos(i, j));
             }
         }
     }

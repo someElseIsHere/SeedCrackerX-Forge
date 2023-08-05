@@ -8,11 +8,11 @@ import kaptainwutax.seedcrackerX.config.StructureSave;
 import kaptainwutax.seedcrackerX.cracker.DataAddedEvent;
 import kaptainwutax.seedcrackerX.cracker.storage.DataStorage;
 import kaptainwutax.seedcrackerX.util.Log;
-import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Language;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.locale.Language;
 
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
+import static net.minecraft.commands.Commands.literal;
 
 public class DataCommand extends ClientCommand {
 
@@ -22,7 +22,7 @@ public class DataCommand extends ClientCommand {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
+    public void build(LiteralArgumentBuilder<CommandSourceStack> builder) {
         builder.then(literal("clear")
                 .executes(this::clear)
         );
@@ -36,23 +36,23 @@ public class DataCommand extends ClientCommand {
         );
     }
 
-    public int clear(CommandContext<FabricClientCommandSource> context) {
+    public int clear(CommandContext<CommandSourceStack> context) {
         SeedCracker.get().reset();
 
-        sendFeedback(Language.getInstance().get("data.clearData"), Formatting.GREEN, false);
+        sendFeedback(Language.getInstance().getOrDefault("data.clearData"), ChatFormatting.GREEN, false);
         return 0;
     }
 
-    private int printBits(CommandContext<FabricClientCommandSource> context) {
+    private int printBits(CommandContext<CommandSourceStack> context) {
         DataStorage s = SeedCracker.get().getDataStorage();
-        String message = Language.getInstance().get("data.collectedBits").formatted((int) s.getBaseBits(), (int) s.getWantedBits());
-        String message2 = Language.getInstance().get("data.collectedLiftingBits").formatted((int) s.getLiftingBits(), 40);
-        sendFeedback(message, Formatting.GREEN, false);
-        sendFeedback(message2, Formatting.GREEN, false);
+        String message = Language.getInstance().getOrDefault("data.collectedBits").formatted((int) s.getBaseBits(), (int) s.getWantedBits());
+        String message2 = Language.getInstance().getOrDefault("data.collectedLiftingBits").formatted((int) s.getLiftingBits(), 40);
+        sendFeedback(message, ChatFormatting.GREEN, false);
+        sendFeedback(message2, ChatFormatting.GREEN, false);
         return 0;
     }
 
-    private int restoreData(CommandContext<FabricClientCommandSource> context) {
+    private int restoreData(CommandContext<CommandSourceStack> context) {
         var preloaded = StructureSave.loadStructures();
         if (!preloaded.isEmpty()) {
             for (RegionStructure.Data<?> data : preloaded) {

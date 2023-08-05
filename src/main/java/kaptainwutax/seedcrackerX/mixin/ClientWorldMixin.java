@@ -2,17 +2,17 @@ package kaptainwutax.seedcrackerX.mixin;
 
 import kaptainwutax.seedcrackerX.SeedCracker;
 import kaptainwutax.seedcrackerX.config.StructureSave;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.registry.DynamicRegistryManager;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.util.profiler.Profiler;
-import net.minecraft.world.MutableWorldProperties;
-import net.minecraft.world.World;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.BiomeKeys;
-import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.core.Holder;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.storage.WritableLevelData;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -21,11 +21,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.function.Supplier;
 
-@Mixin(ClientWorld.class)
-public abstract class ClientWorldMixin extends World {
+@Mixin(ClientLevel.class)
+public abstract class ClientWorldMixin extends Level {
 
-    protected ClientWorldMixin(MutableWorldProperties properties, RegistryKey<World> registryRef, DynamicRegistryManager registryManager, RegistryEntry<DimensionType> dimensionEntry, Supplier<Profiler> profiler, boolean isClient, boolean debugWorld, long biomeAccess, int maxChainedNeighborUpdates) {
-        super(properties, registryRef, registryManager, dimensionEntry, profiler, isClient, debugWorld, biomeAccess, maxChainedNeighborUpdates);
+    protected ClientWorldMixin(WritableLevelData p_270739_, ResourceKey<Level> p_270683_, RegistryAccess p_270200_, Holder<DimensionType> p_270240_, Supplier<ProfilerFiller> p_270692_, boolean p_270904_, boolean p_270470_, long p_270248_, int p_270466_) {
+        super(p_270739_, p_270683_, p_270200_, p_270240_, p_270692_, p_270904_, p_270470_, p_270248_, p_270466_);
     }
 
     @Inject(method = "disconnect", at = @At("HEAD"))
@@ -34,10 +34,10 @@ public abstract class ClientWorldMixin extends World {
         SeedCracker.get().reset();
     }
 
-    @Inject(method = "getGeneratorStoredBiome", at = @At("HEAD"), cancellable = true)
-    private void getGeneratorStoredBiome(int x, int y, int z, CallbackInfoReturnable<RegistryEntry<Biome>> ci) {
-        var biome = getRegistryManager().get(RegistryKeys.BIOME).getEntry(BiomeKeys.THE_VOID);
-        biome.ifPresent(ci::setReturnValue);
+    @Inject(method = "getUncachedNoiseBiome", at = @At("HEAD"), cancellable = true)
+    private void getGeneratorStoredBiome(int p_205516_, int p_205517_, int p_205518_, CallbackInfoReturnable<Holder<Biome>> cir) {
+        var biome = registryAccess().registryOrThrow(Registries.BIOME).getHolder(Biomes.THE_VOID);
+        biome.ifPresent(cir::setReturnValue);
     }
 
 }
