@@ -5,6 +5,8 @@ import kaptainwutax.seedcrackerX.config.Config;
 import kaptainwutax.seedcrackerX.cracker.storage.DataStorage;
 import kaptainwutax.seedcrackerX.finder.FinderQueue;
 import kaptainwutax.seedcrackerX.init.ClientCommands;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -29,13 +31,19 @@ public class SeedCracker {
 
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         modEventBus.addListener(this::commonSetup);
+        MinecraftForge.EVENT_BUS.register(this);
     }
 
     private void commonSetup(FMLCommonSetupEvent event){
         Config.load();
         Features.init(Config.get().getVersion());
+    }
+
+    @SubscribeEvent
+    public void commandEvent(RegisterCommandsEvent ev) {
         ClientCommands.registerCommands();
     }
+
     public DataStorage getDataStorage() {
         return this.dataStorage;
     }
