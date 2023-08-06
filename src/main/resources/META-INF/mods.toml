@@ -17,7 +17,7 @@ license="${mod_license}"
 # The modid of the mod
 modId="seedcracker" #mandatory
 # The version number of the mod
-version="2.14.4" #mandatory
+version="2.14.4.1" #mandatory
 # A display name for the mod
 displayName="SeedCrackerX" #mandatory
 # A URL to query for updates for this mod. See the JSON update specification https://docs.minecraftforge.net/en/latest/misc/updatechecker/
