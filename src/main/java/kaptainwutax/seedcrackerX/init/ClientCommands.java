@@ -2,6 +2,7 @@ package kaptainwutax.seedcrackerX.init;
 
 import com.mojang.brigadier.CommandDispatcher;
 import kaptainwutax.seedcrackerX.command.*;
+import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraftforge.client.ClientCommandHandler;
 
@@ -32,7 +33,7 @@ public class ClientCommands {
     }
 
     public static void registerCommands(CommandDispatcher<CommandSourceStack> dispatcher) {
-        COMMANDS.forEach(clientCommand -> clientCommand.register(dispatcher));
-    }
+            COMMANDS.forEach(clientCommand -> clientCommand.register(dispatcher));
 
+    }
 }

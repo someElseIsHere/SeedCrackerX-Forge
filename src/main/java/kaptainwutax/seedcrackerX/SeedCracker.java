@@ -8,15 +8,13 @@ import kaptainwutax.seedcrackerX.init.ClientCommands;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RegisterClientCommandsEvent;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
 import java.util.ArrayList;
 
 @Mod("seedcracker")
 public class SeedCracker {
-
     public static final ArrayList<SeedCrackerAPI> entrypoints = new ArrayList<>();
     private static SeedCracker INSTANCE;
     private final DataStorage dataStorage = new DataStorage();
@@ -27,9 +25,15 @@ public class SeedCracker {
 
     public SeedCracker() {
         INSTANCE = this;
-        MinecraftForge.EVENT_BUS.register(this);
-        Config.load();
-        Features.init(Config.get().getVersion());
+        DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> () -> {
+            Config.load();
+            Features.init(Config.get().getVersion());
+            MinecraftForge.EVENT_BUS.addListener(this::onRegisterClientCommands);
+        });
+    }
+
+    public void onRegisterClientCommands(RegisterClientCommandsEvent event) {
+        ClientCommands.registerCommands(event.getDispatcher());
     }
 
     public DataStorage getDataStorage() {
@@ -39,10 +43,5 @@ public class SeedCracker {
     public void reset() {
         SeedCracker.get().getDataStorage().clear();
         FinderQueue.get().finderControl.deleteFinders();
-    }
-
-    @SubscribeEvent
-    public static void onRegisterCommands(RegisterClientCommandsEvent event) {
-        ClientCommands.registerCommands(event.getDispatcher());
     }
 }

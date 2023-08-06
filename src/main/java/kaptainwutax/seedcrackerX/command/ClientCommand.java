@@ -11,14 +11,12 @@ import net.minecraft.network.chat.Component;
 
 import static net.minecraft.commands.Commands.literal;
 
-
-public abstract class ClientCommand{
+public abstract class ClientCommand {
 
     public static void sendFeedback(String message, ChatFormatting color, boolean overlay) {
         try {
             Minecraft.getInstance().player.displayClientMessage(Component.literal(message).withStyle(color), overlay);
-        } catch (Exception e) {
-        }
+        } catch (Exception ignored) {}
     }
 
     public abstract String getName();

@@ -53,7 +53,7 @@ description='''a port of 19MisterX98's SeedcrackerX for forge'''
     # AFTER - This mod is loaded AFTER the dependency
     ordering="NONE"
     # Side this dependency is applied on - BOTH, CLIENT, or SERVER
-    side="BOTH"
+    side="CLIENT"
 # Here's another dependency
 [[dependencies.seedcracker]]
     modId="minecraft"
@@ -61,11 +61,11 @@ description='''a port of 19MisterX98's SeedcrackerX for forge'''
     # This version range declares a minimum of the current minecraft version up to but not including the next major version
     versionRange="[1.20.1,1.21)"
     ordering="NONE"
-    side="BOTH"
+    side="CLIENT"
 
 [[dependencies.seedcracker]]
     modId="cloth_config"
     mandatory=true
     versionRange="[4.11.37,)"
     ordering="BEFORE"
-    side="BOTH"
+    side="CLIENT"

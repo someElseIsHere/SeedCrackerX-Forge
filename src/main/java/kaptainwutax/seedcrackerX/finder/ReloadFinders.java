@@ -9,7 +9,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.ChunkPos;
 
 public class ReloadFinders {
-    public Minecraft client = Minecraft.getInstance();
 
     public static void reloadHeight(int minY, int maxY) {
         Finder.CHUNK_POSITIONS.clear();
@@ -33,6 +32,8 @@ public class ReloadFinders {
     }
 
     public void reload() {
+        Minecraft client = Minecraft.getInstance();
+
         int renderdistance = client.options.renderDistance().get();
 
         int playerChunkX = (int) (Math.round(client.player.getX()) >> 4);

@@ -4,7 +4,6 @@ plugins {
     id 'maven-publish'
     id 'net.minecraftforge.gradle' version '[6.0,6.2)'
     id 'org.spongepowered.mixin' version '0.7.+'
-    id 'com.github.johnrengelman.shadow' version '7.1.0'
 }
 
 version = mod_version
@@ -14,9 +13,6 @@ base {
     archivesName = mod_id
 }
 
-shadowJar {
-    configurations = [project.configurations.shadow]
-}
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
@@ -73,31 +69,23 @@ repositories {
     maven { url = 'https://maven.minecraftforge.net/' }
 }
 
+jarJar.enable()
+
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 
     implementation "me.shedaniel.cloth:cloth-config-forge:11.1.106"
 
-    implementation('com.seedfinding:mc_math:[1.171.0]')
-    implementation('com.seedfinding:mc_seed:[1.171.2]')
-    implementation('com.seedfinding:mc_core:[1.200.0]')
-    implementation('com.seedfinding:mc_noise:[1.171.1]')
-    implementation('com.seedfinding:mc_biome:[1.171.1]')
-    implementation('com.seedfinding:mc_terrain:[1.171.1]')
-    implementation('com.seedfinding:mc_feature:[1.171.7]')
-    implementation('com.seedfinding:mc_reversal:[1.171.1]')
-    implementation('com.seedfinding:latticg:[1.06]')
-
-    shadow('com.seedfinding:mc_math:[1.171.0]')
-    shadow('com.seedfinding:mc_seed:[1.171.2]')
-    shadow('com.seedfinding:mc_core:[1.200.0]')
-    shadow('com.seedfinding:mc_noise:[1.171.1]')
-    shadow('com.seedfinding:mc_biome:[1.171.1]')
-    shadow('com.seedfinding:mc_terrain:[1.171.1]')
-    shadow('com.seedfinding:mc_feature:[1.171.7]')
-    shadow('com.seedfinding:mc_reversal:[1.171.1]')
-    shadow('com.seedfinding:latticg:[1.06]')
+    minecraftLibrary jarJar('com.seedfinding:mc_math:[1.171.0]')
+    minecraftLibrary jarJar('com.seedfinding:mc_seed:[1.171.2]')
+    minecraftLibrary jarJar('com.seedfinding:mc_core:[1.200.0]')
+    minecraftLibrary jarJar('com.seedfinding:mc_noise:[1.171.1]')
+    minecraftLibrary jarJar('com.seedfinding:mc_biome:[1.171.1]')
+    minecraftLibrary jarJar('com.seedfinding:mc_terrain:[1.171.1]')
+    minecraftLibrary jarJar('com.seedfinding:mc_feature:[1.171.7]')
+    minecraftLibrary jarJar('com.seedfinding:mc_reversal:[1.171.1]')
+    minecraftLibrary jarJar('com.seedfinding:latticg:[1.06]')
 }
 
 tasks.named('processResources', ProcessResources).configure {
@@ -115,7 +103,7 @@ tasks.named('processResources', ProcessResources).configure {
     }
 }
 
-tasks.named('jar', Jar).configure {
+jar {
     manifest {
         attributes([
                 'Specification-Title'     : mod_id,
@@ -128,12 +116,19 @@ tasks.named('jar', Jar).configure {
         ])
     }
 
-    finalizedBy 'reobfJar'
+
 }
+
+jar.finalizedBy 'reobfJar'
+tasks.jarJar.finalizedBy('reobfJarJar')
+reobf {
+    jarJar {}
+}
+
 publishing {
     publications {
         register('mavenJava', MavenPublication) {
-            artifact tasks.shadowJar
+            artifact jar
         }
     }
     repositories {
