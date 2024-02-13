@@ -172,7 +172,7 @@ dependencies {
 }
 
 mixin {
-    config "seedcracker.mixin.json"
+    config "seedcracker.mixins.json"
     add sourceSets.main, "seedcrackerx.refmap.json"
 }
 // Example for how to get properties into the manifest for reading by the runtime..
