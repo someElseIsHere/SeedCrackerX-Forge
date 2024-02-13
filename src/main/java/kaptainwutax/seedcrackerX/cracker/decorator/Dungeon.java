@@ -1,43 +1,39 @@
 package kaptainwutax.seedcrackerX.cracker.decorator;
 
 
-import com.seedfinding.latticg.reversal.DynamicProgram;
-import com.seedfinding.latticg.reversal.calltype.java.JavaCalls;
-import com.seedfinding.latticg.util.LCG;
-import com.seedfinding.mcbiome.biome.Biome;
-import com.seedfinding.mcbiome.biome.Biomes;
-import com.seedfinding.mccore.rand.ChunkRand;
-import com.seedfinding.mccore.state.Dimension;
-import com.seedfinding.mccore.util.math.Vec3i;
-import com.seedfinding.mccore.version.MCVersion;
-import com.seedfinding.mccore.version.VersionMap;
-import com.seedfinding.mcreversal.ChunkRandomReverser;
+import kaptainwutax.biomeutils.Biome;
 import kaptainwutax.seedcrackerX.SeedCracker;
 import kaptainwutax.seedcrackerX.cracker.storage.DataStorage;
 import kaptainwutax.seedcrackerX.cracker.storage.TimeMachine;
 import kaptainwutax.seedcrackerX.profile.config.ConfigScreen;
 import kaptainwutax.seedcrackerX.util.Log;
+import kaptainwutax.seedutils.lcg.LCG;
+import kaptainwutax.seedutils.mc.ChunkRand;
+import kaptainwutax.seedutils.mc.Dimension;
+import kaptainwutax.seedutils.mc.MCVersion;
+import kaptainwutax.seedutils.mc.VersionMap;
+import mjtb49.hashreversals.ChunkRandomReverser;
+import net.minecraft.util.math.vector.Vector3i;
+import randomreverser.ReverserDevice;
+import randomreverser.call.FilteredSkip;
+import randomreverser.call.NextInt;
+
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Dungeon extends Decorator<Decorator.Config, Dungeon.Data> {
 
-	@Override
-	public Dimension getValidDimension() {
-		return Dimension.OVERWORLD;
-	}
-
-	public static final VersionMap<Config> CONFIGS = new VersionMap<Config>()
-			.add(MCVersion.v1_13, new Config(2, 3))
-			.add(MCVersion.v1_16, new Config(3, 2)
-									.add(3, 3, Biomes.DESERT, Biomes.SWAMP, Biomes.SWAMP_HILLS));
+	public static final VersionMap<Decorator.Config> CONFIGS = new VersionMap<Decorator.Config>()
+			.add(MCVersion.v1_13, new Decorator.Config(2, 3))
+			.add(MCVersion.v1_16, new Decorator.Config(3, 2)
+									.add(3, 3, Biome.DESERT, Biome.SWAMP, Biome.SWAMP_HILLS));
 
 	public Dungeon(MCVersion version) {
 		super(CONFIGS.getAsOf(version), version);
 	}
 
-	public Dungeon(Config config) {
+	public Dungeon(Decorator.Config config) {
 		super(config, null);
 	}
 
@@ -47,7 +43,7 @@ public class Dungeon extends Decorator<Decorator.Config, Dungeon.Data> {
 	}
 
 	@Override
-	public boolean canStart(Data data, long structureSeed, ChunkRand rand) {
+	public boolean canStart(Dungeon.Data data, long structureSeed, ChunkRand rand) {
 		super.canStart(data, structureSeed, rand);
 
 		for(int i = 0; i < 8; i++) {
@@ -81,14 +77,14 @@ public class Dungeon extends Decorator<Decorator.Config, Dungeon.Data> {
 
 	@Override
 	public boolean isValidBiome(Biome biome) {
-		return biome != Biomes.NETHER_WASTES && biome != Biomes.SOUL_SAND_VALLEY && biome != Biomes.WARPED_FOREST
-					&& biome != Biomes.CRIMSON_FOREST && biome != Biomes.BASALT_DELTAS && biome != Biomes.END_MIDLANDS
-					&& biome != Biomes.END_HIGHLANDS && biome != Biomes.END_BARRENS && biome != Biomes.SMALL_END_ISLANDS
-					&& biome != Biomes.THE_VOID && biome == Biomes.THE_END;
+		return biome != Biome.NETHER_WASTES && biome != Biome.SOUL_SAND_VALLEY && biome != Biome.WARPED_FOREST
+					&& biome != Biome.CRIMSON_FOREST && biome != Biome.BASALT_DELTAS && biome != Biome.END_MIDLANDS
+					&& biome != Biome.END_HIGHLANDS && biome != Biome.END_BARRENS && biome != Biome.SMALL_END_ISLANDS
+					&& biome != Biome.THE_VOID && biome == Biome.THE_END;
 	}
 
-	public Data at(int blockX, int blockY, int blockZ, Vec3i size, int[] floorCalls, Biome biome) {
-		return new Data(this, blockX, blockY, blockZ, size, floorCalls, biome);
+	public Dungeon.Data at(int blockX, int blockY, int blockZ, Vector3i size, int[] floorCalls, Biome biome) {
+		return new Dungeon.Data(this, blockX, blockY, blockZ, size, floorCalls, biome);
 	}
 
 	public static class Data extends Decorator.Data<Dungeon> {
@@ -102,11 +98,11 @@ public class Dungeon extends Decorator<Decorator.Config, Dungeon.Data> {
 		private final int blockY;
 		public final int offsetZ;
 		public final int blockZ;
-		public final Vec3i size;
+		public final Vector3i size;
 		public final int[] floorCalls;
 		public float bitsCount;
 
-		public Data(Dungeon feature, int blockX, int blockY, int blockZ, Vec3i size, int[] floorCalls, Biome biome) {
+		public Data(Dungeon feature, int blockX, int blockY, int blockZ, Vector3i size, int[] floorCalls, Biome biome) {
 			super(feature, blockX >> 4, blockZ >> 4, biome);
 			if(this.feature.getVersion().isOlderThan(MCVersion.v1_13)) { //1.12
 				blockX -= 8;
@@ -145,34 +141,31 @@ public class Dungeon extends Decorator<Decorator.Config, Dungeon.Data> {
 				Log.printDungeonInfo(this.blockX + ", " + this.blockY + ", " + this.blockZ + ", \"" + floorString + "\"");
 				Log.warn("Dungeonbiome: "+this.biome.getName());
 			}
-			DynamicProgram device = DynamicProgram.create(LCG.JAVA);
+			ReverserDevice device = new ReverserDevice();
 
 			if(this.feature.getVersion().isOlderThan(MCVersion.v1_15)) {
-				device.add(JavaCalls.nextInt(16).equalTo(this.offsetX));
-				device.add(JavaCalls.nextInt(256).equalTo(this.blockY));
-				device.add(JavaCalls.nextInt(16).equalTo(this.offsetZ));
+				device.addCall(NextInt.withValue(16,this.offsetX));
+				device.addCall(NextInt.withValue(256,this.blockY));
+				device.addCall(NextInt.withValue(16,this.offsetZ));
 			} else {
-				device.add(JavaCalls.nextInt(16).equalTo(this.offsetX));
-				device.add(JavaCalls.nextInt(16).equalTo(this.offsetZ));
-				device.add(JavaCalls.nextInt(256).equalTo(this.blockY));
+				device.addCall(NextInt.withValue(16,this.offsetX));
+				device.addCall(NextInt.withValue(16,this.offsetZ));
+				device.addCall(NextInt.withValue(256,this.blockY));
 			}
 			device.skip(2);
 
-			for (int call : this.floorCalls) {
-				if (call == COBBLESTONE_CALL) {
-					device.add(JavaCalls.nextInt(4).equalTo(0));
-				} else if (call == MOSSY_COBBLESTONE_CALL) {
+			for(int call: this.floorCalls) {
+				if(call == COBBLESTONE_CALL) {
+					device.addCall(NextInt.withValue(4, 0));
+				} else if(call == MOSSY_COBBLESTONE_CALL) {
 					//Skip mossy, brute-force later.
-					device.filteredSkip(r -> {
-						int l = r.nextInt(4);
-						return l != 0;
-					}, 1);
-				} else if (call == 2) {
-					device.skip(1);
+					device.addCall(FilteredSkip.filter(r -> r.nextInt(4) != 0));
+				} else if(call == 2){
+					device.addCall(NextInt.consume(4, 1));
 				}
 			}
 
-			Set<Long> decoratorSeeds = device.reverse().parallel().boxed().collect(Collectors.toSet());
+			Set<Long> decoratorSeeds = device.streamSeeds().sequential().collect(Collectors.toSet());
 
 			if(decoratorSeeds.isEmpty()) {
 				Log.error("Finished dungeon search with no seeds.");
@@ -190,7 +183,7 @@ public class Dungeon extends Decorator<Decorator.Config, Dungeon.Data> {
 				for (long decoratorSeed : decoratorSeeds) {
 
 					for (int i = 0; i < 200; i++) {
-						for(long structureSeed: ChunkRandomReverser.reversePopulationSeed(decoratorSeed ^ LCG.JAVA.multiplier, blockX >> 4, blockZ >> 4,MCVersion.v1_12_2)) {
+						for(long structureSeed:ChunkRandomReverser.reversePopulationSeed(decoratorSeed ^ LCG.JAVA.multiplier, blockX >> 4, blockZ >> 4,MCVersion.v1_12_2)) {
 							if(dataStorage.addDungeon12StructureSeed(structureSeed)) {
 								return;
 							}

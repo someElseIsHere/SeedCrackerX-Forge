@@ -1,6 +1,5 @@
 package kaptainwutax.seedcrackerX.finder;
 
-import com.seedfinding.mccore.version.MCVersion;
 import kaptainwutax.seedcrackerX.SeedCracker;
 import kaptainwutax.seedcrackerX.cracker.BiomeData;
 import kaptainwutax.seedcrackerX.cracker.DataAddedEvent;
@@ -9,6 +8,7 @@ import kaptainwutax.seedcrackerX.render.Color;
 import kaptainwutax.seedcrackerX.render.Cube;
 import kaptainwutax.seedcrackerX.util.BiomeFixer;
 import kaptainwutax.seedcrackerX.util.Log;
+import kaptainwutax.seedutils.mc.MCVersion;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.DimensionType;
@@ -45,7 +45,7 @@ public class BiomeFinder extends Finder {
                     continue;
                 }
                 BiomeData data;
-                com.seedfinding.mcbiome.biome.Biome otherBiome = BiomeFixer.swap(biome);
+                kaptainwutax.biomeutils.Biome otherBiome = BiomeFixer.swap(biome);
                 if(SeedCracker.MC_VERSION.isNewerOrEqualTo(MCVersion.v1_15)) {
                     data = new BiomeData(otherBiome, blockPos.getX() >> 2, blockPos.getZ() >> 2);
                 } else {

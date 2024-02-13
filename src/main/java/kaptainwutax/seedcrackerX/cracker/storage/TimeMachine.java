@@ -1,14 +1,14 @@
 package kaptainwutax.seedcrackerX.cracker.storage;
 
-import com.seedfinding.latticg.util.LCG;
-import com.seedfinding.mcbiome.source.OverworldBiomeSource;
-import com.seedfinding.mccore.rand.ChunkRand;
-import com.seedfinding.mccore.rand.seed.StructureSeed;
-import com.seedfinding.mccore.rand.seed.WorldSeed;
-import com.seedfinding.mcfeature.Feature;
+import kaptainwutax.biomeutils.source.OverworldBiomeSource;
+import kaptainwutax.featureutils.Feature;
 import kaptainwutax.seedcrackerX.SeedCracker;
 import kaptainwutax.seedcrackerX.cracker.BiomeData;
 import kaptainwutax.seedcrackerX.util.Log;
+import kaptainwutax.seedutils.lcg.LCG;
+import kaptainwutax.seedutils.mc.ChunkRand;
+import kaptainwutax.seedutils.mc.seed.StructureSeed;
+import kaptainwutax.seedutils.mc.seed.WorldSeed;
 
 import java.util.ArrayList;
 import java.util.List;

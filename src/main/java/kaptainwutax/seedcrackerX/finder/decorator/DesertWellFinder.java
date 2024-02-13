@@ -1,7 +1,6 @@
 package kaptainwutax.seedcrackerX.finder.decorator;
 
-import com.seedfinding.mccore.util.math.Vec3i;
-import com.seedfinding.mcfeature.decorator.DesertWell;
+import kaptainwutax.featureutils.decorator.DesertWell;
 import kaptainwutax.seedcrackerX.Features;
 import kaptainwutax.seedcrackerX.SeedCracker;
 import kaptainwutax.seedcrackerX.cracker.DataAddedEvent;
@@ -16,9 +15,10 @@ import net.minecraft.block.Blocks;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.DimensionType;
+import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.DimensionType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +29,7 @@ public class DesertWellFinder extends PieceFinder {
 		return false;
 	});
 
-	protected static Vec3i SIZE = new Vec3i(5, 6, 5);
+	protected static BlockPos SIZE = new BlockPos(5, 6, 5);
 
 	public DesertWellFinder(World world, ChunkPos chunkPos) {
 		super(world, chunkPos, Direction.NORTH, SIZE);
@@ -79,7 +79,7 @@ public class DesertWellFinder extends PieceFinder {
 		this.addBlock(water, p1.getX(), p1.getY(), p1.getZ());
 
 		Direction.Plane.HORIZONTAL.forEach(facing -> {
-			BlockPos p2 = p1.offset(facing.getNormal());
+			BlockPos p2 = p1.relative(facing);
 			this.addBlock(water, p2.getX(), p2.getY(), p2.getZ());
 		});
 	}

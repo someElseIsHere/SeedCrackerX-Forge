@@ -12,8 +12,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3i;
-import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
+import net.minecraft.world.DimensionType;
 
 import java.util.ArrayList;
 import java.util.List;

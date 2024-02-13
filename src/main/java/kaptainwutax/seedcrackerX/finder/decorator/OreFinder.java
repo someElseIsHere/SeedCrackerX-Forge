@@ -6,8 +6,8 @@ import net.minecraft.block.BlockState;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
+import net.minecraft.world.DimensionType;
 import net.minecraft.world.gen.feature.OreFeatureConfig;
 
 import java.util.*;
@@ -61,7 +61,7 @@ public abstract class OreFinder extends BlockFinder {
     private boolean isCompleteVein(Set<BlockPos> vein) {
         for(BlockPos pos: vein) {
             for(Direction direction: Direction.values()) {
-                BlockState state = this.world.getBlockState(pos.offset(direction.getNormal()));
+                BlockState state = this.world.getBlockState(pos.relative(direction));
                 if(!state.equals(this.oreFeatureConfig.state) &&
                         !this.oreFeatureConfig.target.test(state, null))return false;
             }

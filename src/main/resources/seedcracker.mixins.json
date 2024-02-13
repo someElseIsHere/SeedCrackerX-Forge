@@ -1,0 +1,19 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "kaptainwutax.seedcrackerX.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+  ],
+  "client": [
+    "DummyProfilerMixin",
+    "GameRendererMixin",
+    "ClientPlayNetworkHandlerMixin",
+    "ClientWorldMixin",
+    "ClientPlayerEntityMixin",
+    "DimensionTypeMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

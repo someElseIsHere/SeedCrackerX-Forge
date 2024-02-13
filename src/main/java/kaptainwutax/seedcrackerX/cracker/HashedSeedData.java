@@ -1,8 +1,7 @@
 package kaptainwutax.seedcrackerX.cracker;
 
-
-import com.seedfinding.mccore.rand.seed.WorldSeed;
-import com.seedfinding.mcseed.rand.JRand;
+import kaptainwutax.seedutils.lcg.rand.JRand;
+import kaptainwutax.seedutils.mc.seed.WorldSeed;
 
 public class HashedSeedData {
 

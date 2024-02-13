@@ -1,6 +1,5 @@
 package kaptainwutax.seedcrackerX.finder.structure;
 
-import com.seedfinding.mccore.util.math.Vec3i;
 import kaptainwutax.seedcrackerX.finder.Finder;
 import kaptainwutax.seedcrackerX.render.Color;
 import kaptainwutax.seedcrackerX.render.Cube;
@@ -8,9 +7,11 @@ import kaptainwutax.seedcrackerX.render.Cuboid;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.gen.feature.StructureFeature;
 import net.minecraft.world.gen.feature.structure.Structure;
 
 import java.util.ArrayList;
@@ -28,9 +29,9 @@ public abstract class AbstractTempleFinder extends Finder {
     });
 
     protected List<PieceFinder> finders = new ArrayList<>();
-    protected final Vec3i size;
+    protected final Vector3i size;
 
-    public AbstractTempleFinder(World world, ChunkPos chunkPos, Vec3i size) {
+    public AbstractTempleFinder(World world, ChunkPos chunkPos, Vector3i size) {
         super(world, chunkPos);
 
         Direction.Plane.HORIZONTAL.forEach(direction -> {
@@ -57,9 +58,9 @@ public abstract class AbstractTempleFinder extends Finder {
 
     protected abstract Structure<?> getStructureFeature();
 
-    public void addRenderers(PieceFinder pieceFinder, BlockPos ZERO, Color color) {
-        this.renderers.add(new Cuboid(ZERO, pieceFinder.getLayout(), color));
-        BlockPos chunkStart = new BlockPos(ZERO.getX() & -16, ZERO.getY(), ZERO.getZ() & -16);
+    public void addRenderers(PieceFinder pieceFinder, BlockPos origin, Color color) {
+        this.renderers.add(new Cuboid(origin, pieceFinder.getLayout(), color));
+        BlockPos chunkStart = new BlockPos(origin.getX() & -16, origin.getY(), origin.getZ() & -16);
         this.renderers.add(new Cube(chunkStart, color));
     }
 

@@ -1,7 +1,7 @@
 package kaptainwutax.seedcrackerX.render;
 
-import com.seedfinding.mccore.util.math.Vec3i;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.vector.Vector3i;
 
 public class Cube extends Cuboid {
 
@@ -14,7 +14,7 @@ public class Cube extends Cuboid {
     }
 
     public Cube(BlockPos pos, Color color) {
-        super(pos, new Vec3i(1, 1, 1), color);
+        super(pos, new Vector3i(1, 1, 1), color);
     }
 
     @Override

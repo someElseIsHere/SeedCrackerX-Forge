@@ -1,7 +1,6 @@
 package kaptainwutax.seedcrackerX.finder.structure;
 
-import com.seedfinding.mccore.util.math.Vec3i;
-import com.seedfinding.mcfeature.structure.RegionStructure;
+import kaptainwutax.featureutils.structure.RegionStructure;
 import kaptainwutax.seedcrackerX.Features;
 import kaptainwutax.seedcrackerX.SeedCracker;
 import kaptainwutax.seedcrackerX.cracker.DataAddedEvent;
@@ -14,9 +13,10 @@ import net.minecraft.state.properties.StairsShape;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.world.World;
+import net.minecraft.world.gen.feature.StructureFeature;
 import net.minecraft.world.gen.feature.structure.Structure;
-import net.minecraft.world.gen.feature.structure.StructureFeatures;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +25,7 @@ import java.util.Map;
 public class SwampHutFinder extends AbstractTempleFinder {
 
     public SwampHutFinder(World world, ChunkPos chunkPos) {
-        super(world, chunkPos, new Vec3i(7, 7, 9));
+        super(world, chunkPos, new Vector3i(7, 7, 9));
     }
 
     @Override
@@ -50,7 +50,7 @@ public class SwampHutFinder extends AbstractTempleFinder {
 
     @Override
     protected Structure<?> getStructureFeature() {
-        return StructureFeatures.SWAMP_HUT.feature;
+        return Structure.SWAMP_HUT;
     }
 
     @Override

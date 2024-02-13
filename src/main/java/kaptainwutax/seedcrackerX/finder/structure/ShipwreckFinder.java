@@ -1,7 +1,6 @@
 package kaptainwutax.seedcrackerX.finder.structure;
 
-import com.seedfinding.mccore.util.block.BlockBox;
-import com.seedfinding.mcfeature.structure.RegionStructure;
+import kaptainwutax.featureutils.structure.RegionStructure;
 import kaptainwutax.seedcrackerX.Features;
 import kaptainwutax.seedcrackerX.SeedCracker;
 import kaptainwutax.seedcrackerX.cracker.DataAddedEvent;
@@ -10,6 +9,7 @@ import kaptainwutax.seedcrackerX.finder.Finder;
 import kaptainwutax.seedcrackerX.render.Color;
 import kaptainwutax.seedcrackerX.render.Cube;
 import kaptainwutax.seedcrackerX.render.Cuboid;
+import kaptainwutax.seedutils.util.BlockBox;
 import net.minecraft.block.*;
 import net.minecraft.block.material.Material;
 import net.minecraft.state.properties.ChestType;
@@ -19,17 +19,20 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.gen.feature.structure.StructureFeatures;
+import net.minecraft.world.DimensionType;
+import net.minecraft.world.gen.feature.StructureFeature;
+import net.minecraft.world.gen.feature.structure.Structure;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ShipwreckFinder extends BlockFinder {
 
-    protected static List<BlockPos> SEARCH_POSITIONS = Finder.buildSearchPositions(Finder.CHUNK_POSITIONS, pos -> false);
+    protected static List<BlockPos> SEARCH_POSITIONS = Finder.buildSearchPositions(Finder.CHUNK_POSITIONS, pos -> {
+        return false;
+    });
 
     public ShipwreckFinder(World world, ChunkPos chunkPos) {
         super(world, chunkPos, Blocks.CHEST);
@@ -40,7 +43,7 @@ public class ShipwreckFinder extends BlockFinder {
     public List<BlockPos> findInChunk() {
         Biome biome = this.world.getNoiseBiome((this.chunkPos.x << 2) + 2, 0, (this.chunkPos.z << 2) + 2);
 
-        if(!biome.getGenerationSettings().isValidStart(StructureFeatures.SHIPWRECK.feature)) {
+        if(!biome.getGenerationSettings().isValidStart(Structure.SHIPWRECK)) {
             return new ArrayList<>();
         }
 
@@ -48,7 +51,7 @@ public class ShipwreckFinder extends BlockFinder {
 
         result.removeIf(pos -> {
             BlockState state = this.world.getBlockState(pos);
-            if(state.getValue(ChestBlock.TYPE) != ChestType.SINGLE) return true;
+            if(state.getValue(ChestBlock.TYPE) != ChestType.SINGLE)return true;
 
             TileEntity blockEntity = this.world.getBlockEntity(pos);
             if(!(blockEntity instanceof ChestTileEntity))return true;

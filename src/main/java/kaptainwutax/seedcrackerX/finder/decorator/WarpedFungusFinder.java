@@ -1,6 +1,5 @@
 package kaptainwutax.seedcrackerX.finder.decorator;
 
-import com.seedfinding.mccore.util.block.BlockBox;
 import kaptainwutax.seedcrackerX.Features;
 import kaptainwutax.seedcrackerX.SeedCracker;
 import kaptainwutax.seedcrackerX.cracker.decorator.FullFungusData;
@@ -11,15 +10,16 @@ import kaptainwutax.seedcrackerX.render.Color;
 import kaptainwutax.seedcrackerX.render.Cube;
 import kaptainwutax.seedcrackerX.render.Cuboid;
 import kaptainwutax.seedcrackerX.util.BiomeFixer;
-import kaptainwutax.seedcrackerX.util.PosFixer;
+import kaptainwutax.seedutils.util.BlockBox;
+import kaptainwutax.seedutils.util.math.Vec3i;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.material.Material;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.DimensionType;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -86,7 +86,7 @@ public class WarpedFungusFinder extends BlockFinder {
                                 dataCounter++;
                                 bigTrunkData.add(1);
 
-                            } else if (block.defaultBlockState().getMaterial() == Material.PLANT || block.defaultBlockState().getMaterial() == Material.GRASS || block.is(Blocks.AIR)){
+                            } else if (block.defaultBlockState().getMaterial() == Material.PLANT || block.defaultBlockState().getMaterial() == Material.WOOD || block.is(Blocks.AIR)){
                                 bigTrunkData.add(0);
 
                         }
@@ -123,7 +123,7 @@ public class WarpedFungusFinder extends BlockFinder {
             if(layerSizes.size()<2)return false;
             int heeeight = height;
 
-            //testing for things inside the vines
+            //testing for things inside of the vines
             int ring = countRing(pos.offset(0,i,0),upperLayerSize+1);
             int vineRingSize = upperLayerSize;
             if(ring == 0 || ring == 2) {
@@ -199,11 +199,17 @@ public class WarpedFungusFinder extends BlockFinder {
 
             Collections.reverse(layerSizes);
             for (int layerSize : layerSizes) {
-                renderBox.add(new BlockBox(PosFixer.swap(pos.offset(layerSize + 1, heeeight, layerSize + 1)), PosFixer.swap(pos.offset(-layerSize, heeeight + 1, -layerSize))));
+                BlockPos pos1 = pos.offset(layerSize + 1, heeeight, layerSize + 1);
+                BlockPos pos2 = pos.offset(-layerSize, heeeight + 1, -layerSize);
+                renderBox.add(new BlockBox(new Vec3i(pos1.getX(), pos1.getY(), pos1.getZ()), new Vec3i(pos2.getX(), pos2.getY(), pos2.getZ())));
                 heeeight--;
             }
-            renderBox.add(new BlockBox(PosFixer.swap(pos.offset(-vineRingSize+1,i-2,-vineRingSize+1)),PosFixer.swap(pos.offset(vineRingSize,i+1,vineRingSize))));
-            renderBox.add(new BlockBox(PosFixer.swap(pos.offset(-vineRingSize,i-2,-vineRingSize)),PosFixer.swap(pos.offset(vineRingSize+1,i+1,vineRingSize+1))));
+            BlockPos pos1 = pos.offset(-vineRingSize+1,i-2,-vineRingSize+1);
+            BlockPos pos2 = pos.offset(vineRingSize,i+1,vineRingSize);
+            renderBox.add(new BlockBox(new Vec3i(pos1.getX(), pos1.getY(), pos1.getX()), new Vec3i(pos2.getX(), pos2.getY(), pos2.getZ())));
+            BlockPos pos3 = pos.offset(-vineRingSize,i-2,-vineRingSize);
+            BlockPos pos4 = pos.offset(vineRingSize+1,i+1,vineRingSize+1);
+            renderBox.add(new BlockBox(new Vec3i(pos3.getX(), pos3.getY(), pos3.getZ()), new Vec3i(pos4.getX(), pos4.getY(), pos4.getZ())));
 
             return false;
         });
@@ -215,7 +221,7 @@ public class WarpedFungusFinder extends BlockFinder {
 
         if(bestFungus == null) return new ArrayList<>();
 
-        WarpedFungus.Data data = Features.WARPED_FUNGUS.at(chunkPos.getMinBlockX(),chunkPos.getMinBlockZ(),BiomeFixer.swap(biome),newResult,bestFungus);
+        WarpedFungus.Data data = Features.WARPED_FUNGUS.at(chunkPos.getMinBlockX(),chunkPos.getMaxBlockZ(),BiomeFixer.swap(biome),newResult,bestFungus);
 
 
 
@@ -231,6 +237,10 @@ public class WarpedFungusFinder extends BlockFinder {
         }
         return newResult;
     }
+
+
+
+
 
     private static final Predicate<Block> prdc = block -> (block == Blocks.SHROOMLIGHT || block == Blocks.WARPED_WART_BLOCK);
 

@@ -1,6 +1,6 @@
 package kaptainwutax.seedcrackerX.util;
 
-import com.seedfinding.mccore.util.math.Vec3i;
+import kaptainwutax.seedutils.util.math.Vec3i;
 import net.minecraft.util.math.BlockPos;
 
 public class PosFixer {

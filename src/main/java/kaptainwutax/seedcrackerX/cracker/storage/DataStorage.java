@@ -1,13 +1,13 @@
 package kaptainwutax.seedcrackerX.cracker.storage;
 
-import com.seedfinding.mcfeature.Feature;
-import com.seedfinding.mcfeature.decorator.DesertWell;
-import com.seedfinding.mcfeature.decorator.EndGateway;
-import com.seedfinding.mcfeature.structure.BuriedTreasure;
-import com.seedfinding.mcfeature.structure.Structure;
-import com.seedfinding.mcfeature.structure.TriangularStructure;
-import com.seedfinding.mcfeature.structure.UniformStructure;
 import io.netty.util.internal.ConcurrentSet;
+import kaptainwutax.featureutils.Feature;
+import kaptainwutax.featureutils.decorator.DesertWell;
+import kaptainwutax.featureutils.decorator.EndGateway;
+import kaptainwutax.featureutils.structure.BuriedTreasure;
+import kaptainwutax.featureutils.structure.Structure;
+import kaptainwutax.featureutils.structure.TriangularStructure;
+import kaptainwutax.featureutils.structure.UniformStructure;
 import kaptainwutax.seedcrackerX.cracker.BiomeData;
 import kaptainwutax.seedcrackerX.cracker.DataAddedEvent;
 import kaptainwutax.seedcrackerX.cracker.HashedSeedData;
@@ -150,7 +150,7 @@ public class DataStorage {
 	}
 
 	public double getWantedBits() {
-		return 256D;
+		return 32.0D;
 	}
 
 	public static double getBits(Feature<?, ?> feature) {

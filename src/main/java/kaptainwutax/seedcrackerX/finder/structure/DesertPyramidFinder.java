@@ -1,7 +1,6 @@
 package kaptainwutax.seedcrackerX.finder.structure;
 
-import com.seedfinding.mccore.util.math.Vec3i;
-import com.seedfinding.mcfeature.structure.RegionStructure;
+import kaptainwutax.featureutils.structure.RegionStructure;
 import kaptainwutax.seedcrackerX.Features;
 import kaptainwutax.seedcrackerX.SeedCracker;
 import kaptainwutax.seedcrackerX.cracker.DataAddedEvent;
@@ -13,6 +12,7 @@ import net.minecraft.block.StairsBlock;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.StructureFeature;
 import net.minecraft.world.gen.feature.structure.Structure;
@@ -24,7 +24,7 @@ import java.util.Map;
 public class DesertPyramidFinder extends AbstractTempleFinder {
     
     public DesertPyramidFinder(World world, ChunkPos chunkPos) {
-        super(world, chunkPos, new Vec3i(21, 15, 21));
+        super(world, chunkPos, new Vector3i(21, 15, 21));
     }
 
     @Override

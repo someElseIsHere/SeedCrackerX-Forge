@@ -1,7 +1,6 @@
 package kaptainwutax.seedcrackerX.finder.structure;
 
-import com.seedfinding.mccore.util.math.Vec3i;
-import com.seedfinding.mcfeature.structure.RegionStructure;
+import kaptainwutax.featureutils.structure.RegionStructure;
 import kaptainwutax.seedcrackerX.Features;
 import kaptainwutax.seedcrackerX.SeedCracker;
 import kaptainwutax.seedcrackerX.cracker.DataAddedEvent;
@@ -13,6 +12,7 @@ import net.minecraft.state.properties.RedstoneSide;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.StructureFeature;
 import net.minecraft.world.gen.feature.structure.Structure;
@@ -24,7 +24,7 @@ import java.util.Map;
 public class JunglePyramidFinder extends AbstractTempleFinder {
 
     public JunglePyramidFinder(World world, ChunkPos chunkPos) {
-        super(world, chunkPos, new Vec3i(12, 10, 15));
+        super(world, chunkPos, new Vector3i(12, 10, 15));
     }
 
     @Override
@@ -85,7 +85,7 @@ public class JunglePyramidFinder extends AbstractTempleFinder {
         finder.addBlock(blockState_5, 5, -3, 4);
         finder.addBlock(blockState_5, 5, -3, 3);
         finder.addBlock(blockState_5, 5, -3, 2);
-        finder.addBlock((Blocks.REDSTONE_WIRE.defaultBlockState().setValue(RedstoneWireBlock.NORTH, RedstoneSide.SIDE)).setValue(RedstoneWireBlock.EAST, RedstoneSide.SIDE), 5, -3, 1);
+        finder.addBlock((Blocks.REDSTONE_WIRE.defaultBlockState().setValue(RedstoneWireBlock.NORTH, RedstoneSide.SIDE)).setValue(RedstoneWireBlock.WEST, RedstoneSide.SIDE), 5, -3, 1);
         finder.addBlock(Blocks.REDSTONE_WIRE.defaultBlockState().setValue(RedstoneWireBlock.EAST, RedstoneSide.SIDE), 4, -3, 1);
         finder.addBlock(Blocks.MOSSY_COBBLESTONE.defaultBlockState(), 3, -3, 1);
 

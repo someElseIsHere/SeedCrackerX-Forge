@@ -1,9 +1,9 @@
 package kaptainwutax.seedcrackerX.profile.config;
 
 
-import com.seedfinding.mccore.version.MCVersion;
 import kaptainwutax.seedcrackerX.command.ClientCommand;
 import kaptainwutax.seedcrackerX.finder.FinderQueue.RenderType;
+import kaptainwutax.seedutils.mc.MCVersion;
 import net.minecraft.util.text.TextFormatting;
 
 public class ConfigObj{
@@ -21,7 +21,7 @@ public class ConfigObj{
     protected boolean DESERT_WELL = true;
     protected boolean WARPED_FUNGUS = true;
     protected boolean BIOME = true;
-    protected MCVersion VERSION = MCVersion.v1_16_5;
+    protected MCVersion VERSION = MCVersion.v1_16_2;
     protected RenderType RENDER = RenderType.XRAY;
     protected boolean Active = true;
 

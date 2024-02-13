@@ -6,7 +6,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.IChunk;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -29,7 +28,7 @@ public abstract class BlockFinder extends Finder {
     @Override
     public List<BlockPos> findInChunk() {
         List<BlockPos> result = new ArrayList<>();
-        IChunk chunk = this.world.getChunk(this.chunkPos.getWorldPosition());
+        Chunk chunk = (Chunk) this.world.getChunk(this.chunkPos.getWorldPosition());
 
         for(BlockPos blockPos: this.searchPositions) {
             BlockState currentState = chunk.getBlockState(blockPos);
@@ -38,6 +37,7 @@ public abstract class BlockFinder extends Finder {
                 result.add(this.chunkPos.getWorldPosition().offset(blockPos));
             }
         }
+
         return result;
     }
 

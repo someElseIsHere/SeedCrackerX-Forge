@@ -1,7 +1,6 @@
 package kaptainwutax.seedcrackerX.finder.structure;
 
-import com.seedfinding.mccore.util.math.Vec3i;
-import com.seedfinding.mcfeature.structure.RegionStructure;
+import kaptainwutax.featureutils.structure.RegionStructure;
 import kaptainwutax.seedcrackerX.Features;
 import kaptainwutax.seedcrackerX.SeedCracker;
 import kaptainwutax.seedcrackerX.cracker.DataAddedEvent;
@@ -13,6 +12,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.StructureFeature;
 import net.minecraft.world.gen.feature.structure.Structure;
@@ -28,7 +28,7 @@ public class IglooFinder extends AbstractTempleFinder {
     });
 
     public IglooFinder(World world, ChunkPos chunkPos) {
-        super(world, chunkPos, new Vec3i(7, 5, 8));
+        super(world, chunkPos, new Vector3i(7, 5, 8));
 
         //Igloos are weird.
         this.finders.forEach(finder -> {

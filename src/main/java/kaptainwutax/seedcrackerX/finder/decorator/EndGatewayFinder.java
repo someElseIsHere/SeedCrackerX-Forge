@@ -1,6 +1,6 @@
 package kaptainwutax.seedcrackerX.finder.decorator;
 
-import com.seedfinding.mcfeature.decorator.EndGateway;
+import kaptainwutax.featureutils.decorator.EndGateway;
 import kaptainwutax.seedcrackerX.Features;
 import kaptainwutax.seedcrackerX.SeedCracker;
 import kaptainwutax.seedcrackerX.cracker.DataAddedEvent;
@@ -13,9 +13,9 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.DimensionType;
 
 import java.util.ArrayList;
 import java.util.List;

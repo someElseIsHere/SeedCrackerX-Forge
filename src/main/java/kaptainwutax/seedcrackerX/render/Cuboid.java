@@ -1,13 +1,14 @@
 package kaptainwutax.seedcrackerX.render;
 
-import com.seedfinding.mccore.util.block.BlockBox;
-import com.seedfinding.mccore.util.math.Vec3i;
+import kaptainwutax.seedutils.util.BlockBox;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.vector.Vector3i;
+
 
 public class Cuboid extends Renderer {
 
     public BlockPos start;
-    public Vec3i size;
+    public Vector3i size;
 
     private Line[] edges = new Line[12];
 
@@ -20,14 +21,14 @@ public class Cuboid extends Renderer {
     }
 
     public Cuboid(BlockPos start, BlockPos end, Color color) {
-        this(start, new Vec3i(end.getX() - start.getX(), end.getY() - start.getY(), end.getZ() - start.getZ()), color);
+        this(start, new Vector3i(end.getX() - start.getX(), end.getY() - start.getY(), end.getZ() - start.getZ()), color);
     }
 
     public Cuboid(BlockBox box, Color color) {
         this(new BlockPos(box.minX, box.minY, box.minZ), new BlockPos(box.maxX, box.maxY, box.maxZ), color);
     }
 
-    public Cuboid(BlockPos start, Vec3i size, Color color) {
+    public Cuboid(BlockPos start, Vector3i size, Color color) {
         this.start = start;
         this.size = size;
         this.edges[0] = new Line(toVec3d(this.start), toVec3d(this.start.offset(this.size.getX(), 0, 0)), color);

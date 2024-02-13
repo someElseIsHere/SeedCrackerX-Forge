@@ -10,10 +10,10 @@ import java.util.List;
 import com.google.gson.Gson;
 
 
-import com.seedfinding.mccore.version.MCVersion;
 import kaptainwutax.seedcrackerX.cracker.HashedSeedData;
 import kaptainwutax.seedcrackerX.finder.FinderQueue;
 import kaptainwutax.seedcrackerX.finder.FinderQueue.RenderType;
+import kaptainwutax.seedutils.mc.MCVersion;
 import kaptainwutax.seedcrackerX.Features;
 import kaptainwutax.seedcrackerX.SeedCracker;
 
@@ -22,7 +22,6 @@ import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
 import me.shedaniel.clothconfig2.impl.builders.SubCategoryBuilder;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -33,8 +32,7 @@ public class ConfigScreen {
     private boolean resetToDefault = false;
     boolean dataClear = false;
     private static ConfigObj config = new ConfigObj();
-
-    private static File file = new File(Minecraft.getInstance().gameDirectory,"seedcracker.json");
+    private static File file = new File("config/seedcracker.json");
 
     public Screen getConfigScreenByCloth(Screen parent) {
         

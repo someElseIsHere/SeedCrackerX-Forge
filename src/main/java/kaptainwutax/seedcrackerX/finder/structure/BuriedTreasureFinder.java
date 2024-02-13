@@ -1,6 +1,6 @@
 package kaptainwutax.seedcrackerX.finder.structure;
 
-import com.seedfinding.mcfeature.structure.RegionStructure;
+import kaptainwutax.featureutils.structure.RegionStructure;
 import kaptainwutax.seedcrackerX.Features;
 import kaptainwutax.seedcrackerX.SeedCracker;
 import kaptainwutax.seedcrackerX.cracker.DataAddedEvent;
@@ -65,7 +65,7 @@ public class BuriedTreasureFinder extends BlockFinder {
 
         result.removeIf(pos -> {
             BlockState chest = world.getBlockState(pos);
-            if(chest.getValue(ChestBlock.WATERLOGGED))return true;
+            if(chest.hasProperty(ChestBlock.WATERLOGGED))return true;
 
             BlockState chestHolder = world.getBlockState(pos.below());
             if(!CHEST_HOLDERS.contains(chestHolder))return true;

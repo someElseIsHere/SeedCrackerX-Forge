@@ -1,21 +1,15 @@
 package kaptainwutax.seedcrackerX.cracker.decorator;
 
-import com.seedfinding.mcbiome.biome.Biome;
-import com.seedfinding.mcbiome.source.BiomeSource;
-import com.seedfinding.mccore.rand.ChunkRand;
-import com.seedfinding.mccore.version.MCVersion;
-import com.seedfinding.mcfeature.Feature;
-import com.seedfinding.mcterrain.TerrainGenerator;
+import kaptainwutax.biomeutils.Biome;
+import kaptainwutax.biomeutils.source.BiomeSource;
+import kaptainwutax.featureutils.Feature;
+import kaptainwutax.seedutils.mc.ChunkRand;
+import kaptainwutax.seedutils.mc.MCVersion;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public abstract class Decorator<C extends Decorator.Config, D extends Decorator.Data<?>> extends Feature<C, D> {
-
-	@Override
-	public boolean canGenerate(D data, TerrainGenerator generator) {
-		return true;
-	}
 
 	public Decorator(C config, MCVersion version) {
 		super(config, version);

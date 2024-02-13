@@ -1,5 +1,6 @@
 package kaptainwutax.seedcrackerX.finder;
 
+import kaptainwutax.seedcrackerX.util.Log;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.math.ChunkPos;
 

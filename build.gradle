@@ -152,33 +152,27 @@ dependencies {
 
     implementation "me.shedaniel.cloth:cloth-config-forge:4.16.91"
 
-    implementation('com.seedfinding:mc_math:0eb505174da8a92550f8ec6efe254e0fa936cc0d') { transitive = false }
-    implementation('com.seedfinding:mc_seed:5518e3ba3ee567fb0b51c15958967f70a6a19e02') { transitive = false }
-    implementation('com.seedfinding:mc_core:d685a37f0a466d4bf800e7f285daf9ef73c81678') { transitive = false }
-    implementation('com.seedfinding:mc_noise:a6ab8e6c688491829f8d2adf845392da22ef8e9c') { transitive = false }
-    implementation('com.seedfinding:mc_biome:b2271807a047bb43ac60c8c20ad47e315f19b9a6') { transitive = false }
-    implementation('com.seedfinding:mc_terrain:9e937ddb838e28e79423c287fa18b1ce66f061d7') { transitive = false }
-    implementation('com.seedfinding:mc_feature:c29fd1fcd746e14c1bcdb127da3113ba273db1fd') { transitive = false }
-    implementation('com.seedfinding:mc_reversal:ca64c0890c106f1a2207623c316fce86f250b918') { transitive = false }
+    implementation('com.github.KaptainWutax:MathUtils:6c2d50eacad0241ff76119e6e703b70bac4b4bce') {transitive = false}
+    implementation('com.github.KaptainWutax:SeedUtils:0de70bc772') {transitive = false}
+    implementation('com.github.KaptainWutax:FeatureUtils:0bd98a8dd892ff8d7292bcf5545f79a91a5eecca') {transitive = false}
+    implementation('com.github.KaptainWutax:BiomeUtils:62b374f2def7e09240447aceeb12a0a601b59a2b') {transitive = false}
+    implementation('com.github.KaptainWutax:ChunkRandomReversal:209eefb8ed2bd097e3c55d3934ba508b664443da') {transitive = false}
+    implementation 'com.github.KaptainWutax:LattiCG:b2a338f7bd765dcd184136c2245ea5765b75edf8'
+    implementation 'com.seedfinding:latticg:1.05@jar'
 
-    implementation('com.seedfinding:latticg:1.06')
-
-    shade('com.seedfinding:mc_math:0eb505174da8a92550f8ec6efe254e0fa936cc0d') { transitive = false }
-    shade('com.seedfinding:mc_seed:5518e3ba3ee567fb0b51c15958967f70a6a19e02') { transitive = false }
-    shade('com.seedfinding:mc_core:d685a37f0a466d4bf800e7f285daf9ef73c81678') { transitive = false }
-    shade('com.seedfinding:mc_noise:a6ab8e6c688491829f8d2adf845392da22ef8e9c') { transitive = false }
-    shade('com.seedfinding:mc_biome:b2271807a047bb43ac60c8c20ad47e315f19b9a6') { transitive = false }
-    shade('com.seedfinding:mc_terrain:9e937ddb838e28e79423c287fa18b1ce66f061d7') { transitive = false }
-    shade('com.seedfinding:mc_feature:c29fd1fcd746e14c1bcdb127da3113ba273db1fd') { transitive = false }
-    shade('com.seedfinding:mc_reversal:ca64c0890c106f1a2207623c316fce86f250b918') { transitive = false; }
-
-    shade('com.seedfinding:latticg:1.06')
+    shade('com.github.KaptainWutax:MathUtils:6c2d50eacad0241ff76119e6e703b70bac4b4bce') {transitive = false}
+    shade('com.github.KaptainWutax:SeedUtils:0de70bc772') {transitive = false}
+    shade('com.github.KaptainWutax:FeatureUtils:0bd98a8dd892ff8d7292bcf5545f79a91a5eecca') {transitive = false}
+    shade('com.github.KaptainWutax:BiomeUtils:62b374f2def7e09240447aceeb12a0a601b59a2b') {transitive = false}
+    shade('com.github.KaptainWutax:ChunkRandomReversal:209eefb8ed2bd097e3c55d3934ba508b664443da') {transitive = false}
+    shade 'com.github.KaptainWutax:LattiCG:b2a338f7bd765dcd184136c2245ea5765b75edf8'
+    shade 'com.seedfinding:latticg:1.05@jar'
 
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 }
 
 mixin {
-    config "seedcrackerx.mixin.json"
+    config "seedcracker.mixin.json"
     add sourceSets.main, "seedcrackerx.refmap.json"
 }
 // Example for how to get properties into the manifest for reading by the runtime..

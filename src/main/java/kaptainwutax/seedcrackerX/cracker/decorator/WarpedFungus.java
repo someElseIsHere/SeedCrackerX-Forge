@@ -1,16 +1,20 @@
 package kaptainwutax.seedcrackerX.cracker.decorator;
 
+import com.seedfinding.latticg.reversal.DynamicProgram;
+import com.seedfinding.latticg.reversal.calltype.java.JavaCalls;
 import com.seedfinding.latticg.util.LCG;
-import com.seedfinding.mcbiome.biome.Biome;
-import com.seedfinding.mcbiome.biome.Biomes;
-import com.seedfinding.mccore.rand.ChunkRand;
-import com.seedfinding.mccore.state.Dimension;
-import com.seedfinding.mccore.version.MCVersion;
-import com.seedfinding.mccore.version.VersionMap;
-import com.seedfinding.mcreversal.PopulationReverser;
+import kaptainwutax.biomeutils.Biome;
+import kaptainwutax.seedcrackerX.SeedCracker;
 import kaptainwutax.seedcrackerX.cracker.storage.DataStorage;
 import kaptainwutax.seedcrackerX.cracker.storage.TimeMachine;
 import kaptainwutax.seedcrackerX.util.Log;
+import kaptainwutax.seedutils.mc.ChunkRand;
+import kaptainwutax.seedutils.mc.Dimension;
+import kaptainwutax.seedutils.mc.MCVersion;
+import kaptainwutax.seedutils.mc.VersionMap;
+import kaptainwutax.seedutils.mc.seed.StructureSeed;
+import kaptainwutax.seedutils.mc.seed.WorldSeed;
+import mjtb49.hashreversals.PopulationReverser;
 import net.minecraft.util.math.BlockPos;
 
 
@@ -19,15 +23,15 @@ import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
 public class WarpedFungus extends Decorator<Decorator.Config, WarpedFungus.Data> {
-    public static final VersionMap<Config> CONFIGS = new VersionMap<Config>()
-            .add(MCVersion.v1_16, new Config(8,3));
+    public static final VersionMap<Decorator.Config> CONFIGS = new VersionMap<Decorator.Config>()
+            .add(MCVersion.v1_16, new Decorator.Config(8,3));
 
     public WarpedFungus(MCVersion version) {
         super(CONFIGS.getAsOf(version), version);
     }
 
-    public Data at(int blockX, int blockZ, Biome biome, List<BlockPos> posList, FullFungusData fungusData) {
-        return new Data(this,blockX,blockZ,biome,posList,fungusData);
+    public WarpedFungus.Data at(int blockX, int blockZ, Biome biome, List<BlockPos> posList, FullFungusData fungusData) {
+        return new WarpedFungus.Data(this,blockX,blockZ,biome,posList,fungusData);
     }
 
     @Override
@@ -36,7 +40,7 @@ public class WarpedFungus extends Decorator<Decorator.Config, WarpedFungus.Data>
     }
 
     @Override
-    public boolean canStart(Data data, long structureSeed, ChunkRand rand) {
+    public boolean canStart(WarpedFungus.Data data, long structureSeed, ChunkRand rand) {
         return true;
     }
 
@@ -46,13 +50,8 @@ public class WarpedFungus extends Decorator<Decorator.Config, WarpedFungus.Data>
     }
 
     @Override
-    public Dimension getValidDimension() {
-        return Dimension.NETHER;
-    }
-
-    @Override
     public boolean isValidBiome(Biome biome) {
-        return biome == Biomes.WARPED_FOREST;
+        return biome == Biome.WARPED_FOREST;
     }
 
     public static class Data extends Decorator.Data<WarpedFungus> {

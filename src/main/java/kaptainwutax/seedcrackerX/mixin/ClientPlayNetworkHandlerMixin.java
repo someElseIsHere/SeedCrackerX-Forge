@@ -6,6 +6,7 @@ import kaptainwutax.seedcrackerX.SeedCracker;
 import kaptainwutax.seedcrackerX.cracker.DataAddedEvent;
 import kaptainwutax.seedcrackerX.cracker.HashedSeedData;
 import kaptainwutax.seedcrackerX.finder.FinderQueue;
+import kaptainwutax.seedcrackerX.finder.ReloadFinders;
 import kaptainwutax.seedcrackerX.init.ClientCommands;
 import kaptainwutax.seedcrackerX.util.Log;
 import net.minecraft.client.Minecraft;
@@ -16,9 +17,9 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.command.ISuggestionProvider;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SChunkDataPacket;
-import net.minecraft.network.play.server.SCommandListPacket;
 import net.minecraft.network.play.server.SJoinGamePacket;
 import net.minecraft.network.play.server.SRespawnPacket;
+import net.minecraft.network.play.server.STabCompletePacket;
 import net.minecraft.util.math.ChunkPos;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -28,9 +29,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ClientPlayNetHandler.class)
 public abstract class ClientPlayNetworkHandlerMixin {
-    @Shadow private ClientWorld level;
 
     @Shadow private CommandDispatcher<ISuggestionProvider> commands;
+
+    @Shadow private ClientWorld level;
 
     @Inject(method = "handleLevelChunk", at = @At(value = "TAIL"))
     private void onChunkData(SChunkDataPacket packet, CallbackInfo ci) {
@@ -41,13 +43,13 @@ public abstract class ClientPlayNetworkHandlerMixin {
 
     @SuppressWarnings("unchecked")
     @Inject(method = "<init>", at = @At("RETURN"))
-    public void onInit(Minecraft p_i46300_1_, Screen p_i46300_2_, NetworkManager p_i46300_3_, GameProfile p_i46300_4_, CallbackInfo ci) {
+    public void onInit(Minecraft mc, Screen screen, NetworkManager connection, GameProfile profile, CallbackInfo ci) {
         ClientCommands.registerCommands((CommandDispatcher<CommandSource>)(Object)this.commands);
     }
 
     @SuppressWarnings("unchecked")
-    @Inject(method = "handleCommands", at = @At("TAIL"))
-    public void onOnCommandTree(SCommandListPacket packet, CallbackInfo ci) {
+    @Inject(method = "handleCommandSuggestions", at = @At("TAIL"))
+    public void onOnCommandTree(STabCompletePacket packet, CallbackInfo ci) {
         ClientCommands.registerCommands((CommandDispatcher<CommandSource>)(Object)this.commands);
     }
 

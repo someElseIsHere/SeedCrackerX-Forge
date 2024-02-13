@@ -18,7 +18,7 @@ public abstract class GameRendererMixin {
 
     @Inject(method = "renderLevel", at = @At("TAIL"))
     private void renderWorldFinish(float delta, long time, MatrixStack matrixStack, CallbackInfo ci) {
-        RenderQueue.get().setTrackRender(matrixStack);
+        RenderQueue.get().setTrackRender(null);
     }
 
 }

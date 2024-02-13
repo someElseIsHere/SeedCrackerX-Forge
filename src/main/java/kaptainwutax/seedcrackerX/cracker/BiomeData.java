@@ -1,9 +1,10 @@
 package kaptainwutax.seedcrackerX.cracker;
 
-import com.seedfinding.mcbiome.biome.Biome;
-import com.seedfinding.mcbiome.source.BiomeSource;
-import com.seedfinding.mccore.version.MCVersion;
+import kaptainwutax.biomeutils.Biome;
+import kaptainwutax.biomeutils.source.BiomeSource;
 import kaptainwutax.seedcrackerX.SeedCracker;
+
+import kaptainwutax.seedutils.mc.MCVersion;
 
 public class BiomeData {
 

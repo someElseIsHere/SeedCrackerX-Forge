@@ -1,7 +1,5 @@
 package kaptainwutax.seedcrackerX.finder.decorator;
 
-import com.seedfinding.mccore.block.Tile;
-import com.seedfinding.mccore.util.math.Vec3i;
 import kaptainwutax.seedcrackerX.Features;
 import kaptainwutax.seedcrackerX.SeedCracker;
 import kaptainwutax.seedcrackerX.cracker.decorator.Dungeon;
@@ -20,9 +18,9 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.vector.Vector3i;
-import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.DimensionType;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -110,7 +108,7 @@ public class DungeonFinder extends BlockFinder {
         Biome biome = this.world.getNoiseBiome((this.chunkPos.x << 2) + 2, 0, (this.chunkPos.z << 2) + 2);
 
         BlockPos pos = result.get(0);
-        Vec3i size = this.getDungeonSizeXray(pos);
+        Vector3i size = this.getDungeonSizeXray(pos);
         int[] floorCalls = this.getFloorCalls(size, pos);
         AntiXRay(pos);
 
@@ -120,7 +118,7 @@ public class DungeonFinder extends BlockFinder {
             this.renderers.add(new Cube(pos, new Color(255, 0, 0)));
 
             if(data.usesFloor()) {
-                this.renderers.add(new Cuboid(pos.subtract(new Vector3i(size.getX(), size.getY(), size.getZ())), pos.offset(size.getX(), size.getY(), size.getZ()).offset(1, -1, 1), new Color(255, 0, 0)));
+                this.renderers.add(new Cuboid(pos.subtract(size), pos.offset(size).offset(1, -1, 1), new Color(255, 0, 0)));
             }
         }
         return result;
@@ -128,7 +126,7 @@ public class DungeonFinder extends BlockFinder {
 
     //getDungeonSize even if server uses antiXray
     //returns old getDungeonSize if it cant find correct size
-    public Vec3i getDungeonSizeXray(BlockPos spawnerPos) {
+    public Vector3i getDungeonSizeXray(BlockPos spawnerPos) {
         int x;
         int z;
         if(this.world.getBlockState(spawnerPos.offset(4, 3, 2)).getBlock()==Blocks.COBBLESTONE) {
@@ -145,22 +143,22 @@ public class DungeonFinder extends BlockFinder {
         }else {
             return getDungeonSize(spawnerPos);
         }
-        return new Vec3i(x,0,z);
+        return new Vector3i(x,0,z);
     }
 
-    public Vec3i getDungeonSize(BlockPos spawnerPos) {
+    public Vector3i getDungeonSize(BlockPos spawnerPos) {
         for(int xo = 4; xo >= 3; xo--) {
             for(int zo = 4; zo >= 3; zo--) {
                 Block block = this.world.getBlockState(spawnerPos.offset(xo, -1, zo)).getBlock();
-                if(block == Blocks.MOSSY_COBBLESTONE || block == Blocks.COBBLESTONE)return new Vec3i(xo, 0, zo);
+                if(block == Blocks.MOSSY_COBBLESTONE || block == Blocks.COBBLESTONE)return new Vector3i(xo, 0, zo);
             }
         }
 
 
-        return Vec3i.ZERO;
+        return Vector3i.ZERO;
     }
 
-    public int[] getFloorCalls(Vec3i dungeonSize, BlockPos spawnerPos) {
+    public int[] getFloorCalls(Vector3i dungeonSize, BlockPos spawnerPos) {
         int[] floorCalls = new int[(dungeonSize.getX() * 2 + 1) * (dungeonSize.getZ() * 2 + 1)];
         int i = 0;
 

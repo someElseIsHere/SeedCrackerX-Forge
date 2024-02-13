@@ -1,11 +1,8 @@
 package kaptainwutax.seedcrackerX.finder.structure;
 
-import com.seedfinding.mccore.util.block.BlockBox;
-import com.seedfinding.mccore.util.block.BlockMirror;
-import com.seedfinding.mccore.util.block.BlockRotation;
-import com.seedfinding.mccore.util.math.Vec3i;
 import kaptainwutax.seedcrackerX.finder.Finder;
-import kaptainwutax.seedcrackerX.util.PosFixer;
+import kaptainwutax.seedutils.util.BlockBox;
+import kaptainwutax.seedutils.util.math.Vec3i;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.Minecraft;
@@ -13,8 +10,9 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.Mirror;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.*;
-import net.minecraft.world.DimensionType;
+import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.world.World;
+import net.minecraft.world.DimensionType;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -37,7 +35,7 @@ public class PieceFinder extends Finder {
 
     private boolean debug;
 
-    public PieceFinder(World world, ChunkPos chunkPos, Direction facing, Vec3i size) {
+    public PieceFinder(World world, ChunkPos chunkPos, Direction facing, Vector3i size) {
         super(world, chunkPos);
 
         this.setOrientation(facing);
@@ -58,12 +56,12 @@ public class PieceFinder extends Finder {
         }
     }
 
-    public Vec3i getLayout() {
+    public Vector3i getLayout() {
         if(this.facing.getAxis() != Direction.Axis.Z) {
-            return new Vec3i(this.depth, this.height, this.width);
+            return new Vector3i(this.depth, this.height, this.width);
         }
 
-        return new Vec3i(this.width, this.height, this.depth);
+        return new Vector3i(this.width, this.height, this.depth);
     }
 
     @Override
@@ -182,8 +180,8 @@ public class PieceFinder extends Finder {
         int y = this.applyYTransform(oy);
         int z = this.applyZTransform(ox, oz);
         BlockPos pos = new BlockPos(x, y, z);
-
-        return !this.boundingBox.contains(PosFixer.swap(pos)) ?
+        Vec3i vec = new Vec3i(x, y, z);
+        return !this.boundingBox.contains(vec) ?
                 Blocks.AIR.defaultBlockState() :
                 this.structure.getOrDefault(pos, Blocks.AIR.defaultBlockState());
     }
@@ -206,13 +204,19 @@ public class PieceFinder extends Finder {
     }
 
     protected void addBlock(BlockState state, int x, int y, int z) {
-        BlockPos pos = new BlockPos(
+        Vec3i pos = new Vec3i(
                 this.applyXTransform(x, z),
                 this.applyYTransform(y),
                 this.applyZTransform(x, z)
         );
 
-        if(this.boundingBox.contains(PosFixer.swap(pos))) {
+        BlockPos blockPos = new BlockPos(
+                this.applyXTransform(x, z),
+                this.applyYTransform(y),
+                this.applyZTransform(x, z)
+        );
+
+        if(this.boundingBox.contains(pos)) {
             if(state == null) {
                 this.structure.remove(pos);
                 return;
@@ -227,7 +231,7 @@ public class PieceFinder extends Finder {
             }
 
 
-            this.structure.put(pos, state);
+            this.structure.put(blockPos, state);
         }
     }
 
